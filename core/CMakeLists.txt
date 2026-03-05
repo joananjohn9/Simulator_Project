@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(sbe_engine VERSION 0.1 LANGUAGES CXX)
+
+# ---- Build settings ----
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Put the executable under the *build* directory (clean repo)
+# e.g. build/bin/sbe_engine
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+# ---- Target ----
+add_executable(sbe_engine)
+
+target_sources(sbe_engine
+  PRIVATE
+    main.cpp
+    src/engine.cpp
+)
+
+target_include_directories(sbe_engine
+  PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+
+# ---- Optional: reasonable warnings (GCC/Clang/MSVC) ----
+if (MSVC)
+  target_compile_options(sbe_engine PRIVATE /W4)
+else()
+  target_compile_options(sbe_engine PRIVATE -Wall -Wextra -Wpedantic)
+endif()

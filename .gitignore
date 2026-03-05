@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+myenv/
+*.egg-info/
+dist/
+build/
+
+# CMake / C++
+core/build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Outputs / runs
+output/
+run*/
+sim_output/
+*.bin
+*.dat
+*.csv
+*.log
+log.txt
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
