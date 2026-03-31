@@ -2,6 +2,7 @@ from pathlib import Path
 import yaml
 import json
 import subprocess
+from config.validate import validate_config
 
 
 def check_path(path: Path) -> Path:
@@ -28,21 +29,7 @@ def parse_yaml(path: Path) -> dict:
     return data
 
 
-def validate_yaml(config_dict: dict) -> dict:
-    REQUIRED_KEYS = ["simulation", "discretization", "fields", "output"]
 
-    if not isinstance(config_dict, dict):
-        raise ValueError("Top level yaml structure must be a mapping")
-
-    for key in REQUIRED_KEYS:
-        if key not in config_dict:
-            raise KeyError(key)
-        if not isinstance(config_dict[key], dict):
-            raise TypeError(
-                f"Value for '{key}' has wrong type. Expected dict got {type(config_dict[key]).__name__}"
-            )
-
-    return config_dict
 
 
 def make_json(validated_config_dict: dict, output_dir: Path) -> Path:
@@ -126,7 +113,7 @@ def run_command(args) -> None:
     output_dir = Path(args.out)
 
     config_dict = parse_yaml(config_path)
-    validated = validate_yaml(config_dict)
+    validated = validate_config(config_dict)
 
     json_path = make_json(validated, output_dir)
 

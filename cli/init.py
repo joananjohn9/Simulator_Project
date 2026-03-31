@@ -1,6 +1,6 @@
 from pathlib import Path 
 
-from pathlib import Path
+
 
 DEFAULT_CONFIG = """\
 simulation:
