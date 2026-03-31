@@ -1,5 +1,7 @@
 from pathlib import Path 
 
+from pathlib import Path
+
 DEFAULT_CONFIG = """\
 simulation:
   model: sbe
@@ -20,21 +22,26 @@ interactions:
 
 fields:
   optical:
-    pulse:
-      type: gaussian
+    - id: opt_1
+      pulse_type: gaussian
       amplitude: 0.01
       frequency: 0.3
       duration_fs: 100
       t0_fs: 0
 
   dc:
-    pulse:
-      type: box
+    - id: dc_1
+      pulse_type: box
       amplitude: 0.002
       t_on_fs: -500
       t_off_fs: 1500
 
+sweep:
+  strategy: cartesian
+  nest_by: optical
+
 output:
+  root_dir: output
   format: binary
   save_k_resolved: true
   save_macroscopic: true
