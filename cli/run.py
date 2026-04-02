@@ -2,12 +2,16 @@ from pathlib import Path
 import yaml
 import json
 import subprocess
+
 from config.validate import validate_config
 
 
+# ---------------------------
+# File Handling
+# ---------------------------
 def check_path(path: Path) -> Path:
     if not path.exists():
-        raise FileNotFoundError(f"Configuration file doesn't exist at {path}.")
+        raise FileNotFoundError(f"Configuration file doesn't exist at {path}")
     if not path.is_file():
         raise IsADirectoryError(f"{path} is not a file")
     return path
@@ -18,56 +22,72 @@ def parse_yaml(path: Path) -> dict:
         with path.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
     except yaml.YAMLError as e:
-        raise ValueError(f"Invalid yaml syntax in {path}") from e
+        raise ValueError(f"Invalid YAML syntax in {path}") from e
 
     if data is None:
-        raise ValueError("Yaml file is empty")
+        raise ValueError("YAML file is empty")
 
     if not isinstance(data, dict):
-        raise ValueError(f"Top level yaml structure must be a mapping: {path}")
+        raise ValueError("Top-level YAML must be a mapping (dict)")
 
     return data
 
 
+# ---------------------------
+# Run Expansion
+# ---------------------------
+def expand_runs(config: dict) -> list[dict]:
+    optical_fields = config["fields"]["optical"]
+    dc_fields = config["fields"]["dc"]
+
+    runs = []
+
+    for opt in optical_fields:
+        for dc in dc_fields:
+            runs.append(
+                {
+                    "optical": opt,
+                    "dc": dc,
+                }
+            )
+
+    return runs
 
 
-
-def make_json(validated_config_dict: dict, output_dir: Path) -> Path:
+# ---------------------------
+# JSON Builder (ONE run only)
+# ---------------------------
+def make_json(run: dict, config: dict, output_dir: Path) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / "input.json"
 
-    simulation = validated_config_dict["simulation"]
-    discretization = validated_config_dict["discretization"]
-    interactions = validated_config_dict.get("interactions", {})  # optional
-    fields_cfg = validated_config_dict["fields"]
-    output_cfg = validated_config_dict["output"]
+    simulation = config["simulation"]
+    discretization = config["discretization"]
+    interactions = config.get("interactions", {})
+    output_cfg = config["output"]
 
-    fields = []
+    optical = run["optical"]
+    dc = run["dc"]
 
-    if "optical" in fields_cfg:
-        pulse = fields_cfg["optical"]["pulse"]
-        fields.append(
-            {
-                "kind": "optical",
-                "pulse_type": pulse["type"],
-                "amplitude": pulse["amplitude"],
-                "frequency": pulse["frequency"],
-                "duration_fs": pulse["duration_fs"],
-                "t0_fs": pulse["t0_fs"],
-            }
-        )
-
-    if "dc" in fields_cfg:
-        pulse = fields_cfg["dc"]["pulse"]
-        fields.append(
-            {
-                "kind": "dc",
-                "pulse_type": pulse["type"],
-                "amplitude": pulse["amplitude"],
-                "t_on_fs": pulse["t_on_fs"],
-                "t_off_fs": pulse["t_off_fs"],
-            }
-        )
+    fields = [
+        {
+            "kind": "optical",
+            "id": optical["id"],
+            "pulse_type": optical["pulse_type"],
+            "amplitude": optical["amplitude"],
+            "frequency": optical["frequency"],
+            "duration_fs": optical["duration_fs"],
+            "t0_fs": optical["t0_fs"],
+        },
+        {
+            "kind": "dc",
+            "id": dc["id"],
+            "pulse_type": dc["pulse_type"],
+            "amplitude": dc["amplitude"],
+            "t_on_fs": dc["t_on_fs"],
+            "t_off_fs": dc["t_off_fs"],
+        },
+    ]
 
     engine_json = {
         "schema_version": "0.1",
@@ -90,34 +110,41 @@ def make_json(validated_config_dict: dict, output_dir: Path) -> Path:
     return json_path
 
 
+# ---------------------------
+# Core Execution
+# ---------------------------
 def pass_to_core(json_path: Path, output_dir: Path) -> None:
-    # repo_root is the "sim/" directory (because this file is sim/cli/run.py)
     repo_root = Path(__file__).resolve().parents[1]
-
     engine_path = repo_root / "core" / "build" / "bin" / "sbe_engine"
+
     if not engine_path.exists():
         raise FileNotFoundError(
             f"Engine executable not found at: {engine_path}\n"
-            f"Build it first (CMake) so core/build/bin/sbe_engine exists."
+            "Build it first (CMake)."
         )
 
-    # Important: use subprocess.run, and pass strings (portable)
     subprocess.run(
         [str(engine_path), str(json_path), str(output_dir)],
         check=True,
     )
 
 
+# ---------------------------
+# Entry Point
+# ---------------------------
 def run_command(args) -> None:
     config_path = check_path(Path(args.config))
-    output_dir = Path(args.out)
+    base_output_dir = Path(args.out)
 
     config_dict = parse_yaml(config_path)
     validated = validate_config(config_dict)
 
-    json_path = make_json(validated, output_dir)
+    runs = expand_runs(validated)
 
-    # This was missing in your earlier code:
-    pass_to_core(json_path, output_dir)
+    for i, run in enumerate(runs):
+        run_dir = base_output_dir / f"run_{i}"
 
-    print(f"OK: wrote {json_path} and invoked engine -> outputs in {output_dir}")
+        json_path = make_json(run, validated, run_dir)
+        pass_to_core(json_path, run_dir)
+
+    print(f"OK: executed {len(runs)} runs in {base_output_dir}")
