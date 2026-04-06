@@ -18,6 +18,7 @@ target_sources(sbe_engine
   PRIVATE
     main.cpp
     src/engine.cpp
+    src/config_loader.cpp
 )
 
 target_include_directories(sbe_engine
