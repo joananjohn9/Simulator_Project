@@ -1,34 +1,36 @@
-def _require_keys(section: dict, required_keys: list[str], path: str) -> None:
+def _require_keys(section:dict, required_keys:list[str], path:str) -> None:
     for key in required_keys:
         if key not in section:
-            raise KeyError(f"{path} missing required key '{key}'")
+            raise KeyError(f"{path} is missing required key '{key}'.")
 
-
-def _reject_unknown_keys(section: dict, allowed_keys: list[str], path: str) -> None:
+def _reject_unknown_keys(section:dict, allowed_keys:list[str], path:str) -> None:
     for key in section:
         if key not in allowed_keys:
-            raise KeyError(f"{path} has unknown key '{key}'")
+            raise KeyError(f"{path} has unknown key '{key}'.")
 
-
-def _require_type(value, expected_type, path: str) -> None:
-    if not isinstance(value, expected_type):
+def _require_type(value,expected_type,path:str) -> None:
+    if not isinstance(value,expected_type):
         if isinstance(expected_type, tuple):
-            expected_name = " or ".join(t.__name__ for t in expected_type)
-        else:
+            expected_name = "or".joint(t.__name__ for t in expected_type)
+        else :
             expected_name = expected_type.__name__
         raise TypeError(f"{path} must be {expected_name}, got {type(value).__name__}")
 
+def validate_config(config_dict:dict) -> dict:
+    required_keys = ["simulation","discretization","fields","sweep", "output"]
 
-def validate_config(config_dict: dict) -> dict:
-    required_keys = ["simulation", "discretization", "fields", "sweep", "output"]
-
-    _require_type(config_dict, dict, "top-level config")
-    _require_keys(config_dict, required_keys, "config")
+    _require_type(config_dict,dict,"top-level config")
+    _require_keys(config_dict,required_keys, "config")
 
     for key in required_keys:
-        _require_type(config_dict[key], dict, f"config.{key}")
+        _require_type(config_dict[key],dict,f"config.{key}")
 
-    fields = validate_fields(config_dict["fields"])
+
+
+    # Deeper validations    
+    validate_simulation(config_dict["simulation"])
+    validate_discretization(config_dict["discretization"])
+    fields=validate_fields(config_dict["fields"])
     validate_optical_fields(fields["optical"])
     validate_dc_fields(fields["dc"])
     validate_sweep(config_dict["sweep"])
@@ -36,51 +38,108 @@ def validate_config(config_dict: dict) -> dict:
 
     return config_dict
 
+def validate_simulation(simulation_dict:dict) -> dict :
+    required_keys_simulation = ["model","order_expansion"]
+    required_keys_order_exp = ["enabled","max_order"]
+   
 
-def validate_fields(field_dict: dict) -> dict:
-    required_keys = ["optical", "dc"]
+    _require_type(simulation_dict,dict,"simulation")
+    _require_keys(simulation_dict,required_keys_simulation, "simulation")
+    _reject_unknown_keys(simulation_dict,required_keys_simulation,"simulation")
 
-    _require_type(field_dict, dict, "fields")
-    _require_keys(field_dict, required_keys, "fields")
-    _reject_unknown_keys(field_dict, required_keys, "fields")
+    _require_type(simulation_dict["model"],str,"simulation.model")
+    
+    _require_type(simulation_dict["order_expansion"],dict, "simulation.order_expansion")
+
+    _require_keys(simulation_dict["order_expansion"],required_keys_order_exp, "simulation.order_expansion")
+    _reject_unknown_keys(simulation_dict["order_expansion"],required_keys_order_exp, "simulation.order_expansion")
+
+    _require_type(simulation_dict["order_expansion"]["enabled"], bool, "simulation.order_expansion.enabled")
+    _require_type(simulation_dict["order_expansion"]["max_order"], int, "simulation.order_expansion.max_order")
+
+    if simulation_dict["order_expansion"]["max_order"] < 0:
+        raise ValueError(
+            f"simulation.order_expansion.max_order should be greater than or equal to zero"
+        )
+
+    if simulation_dict["model"] != "sbe":
+        raise ValueError(
+            f"simulation.model must be 'sbe', got '{simulation_dict['model']}'"
+        )
+
+    return simulation_dict
+
+def validate_discretization(discretization_dict: dict) -> dict:
+    required_keys = ["k_points", "dt_fs", "t_start_fs", "t_end_fs"]
+
+    _require_type(discretization_dict, dict, "discretization")
+    _require_keys(discretization_dict, required_keys, "discretization")
+    _reject_unknown_keys(discretization_dict, required_keys, "discretization")
+
+    _require_type(discretization_dict["k_points"], int, "discretization.k_points")
+    _require_type(discretization_dict["dt_fs"], (int, float), "discretization.dt_fs")
+    _require_type(discretization_dict["t_start_fs"], (int, float), "discretization.t_start_fs")
+    _require_type(discretization_dict["t_end_fs"], (int, float), "discretization.t_end_fs")
+
+    if discretization_dict["k_points"] <= 0:
+        raise ValueError("discretization.k_points must be greater than 0")
+
+    if discretization_dict["dt_fs"] <= 0:
+        raise ValueError("discretization.dt_fs must be greater than 0")
+
+    if discretization_dict["t_end_fs"] <= discretization_dict["t_start_fs"]:
+        raise ValueError(
+            "discretization.t_end_fs must be greater than discretization.t_start_fs"
+        )
+
+    return discretization_dict
+
+    
+
+
+
+    
+
+def validate_fields(field_dict:dict) -> dict:
+    required_keys = ["optical","dc"]
+
+    _require_type(field_dict,dict,"fields")
+    _require_keys(field_dict,required_keys,"fields")
+    _reject_unknown_keys(field_dict,required_keys,"fields")
 
     for key in required_keys:
-        field_list = field_dict[key]
-
-        _require_type(field_list, list, f"fields.{key}")
+        field_list =  field_dict[key]
+        _require_type(field_list,list,f"fields.{key}")
 
         if len(field_list) < 1:
             raise ValueError(f"fields.{key} should not be empty")
 
-        for i, field in enumerate(field_list):
-            _require_type(field, dict, f"fields.{key}[{i}]")
-
+        for i,field in enumerate(field_list):
+            _require_type(field,dict,f"fields.{key}[{i}]")
+    
     return field_dict
 
-
-def validate_optical_fields(optical_fields: list) -> list:
-    required_keys = ["id", "pulse_type", "amplitude", "frequency", "duration_fs", "t0_fs"]
-    allowed_keys = required_keys
+def validate_optical_fields(optical_fields:dict) -> dict:
+    required_keys = ["id", "pulse_type", "amplitude","duration_fs","frequency","t0_fs"]
+    allowed_keys = required_keys 
 
     for i, optical_field in enumerate(optical_fields):
         path = f"fields.optical[{i}]"
 
-        _require_keys(optical_field, required_keys, path)
-        _reject_unknown_keys(optical_field, allowed_keys, path)
+        _require_keys(optical_field,required_keys,path)
+        _reject_unknown_keys(optical_field,allowed_keys,path) 
 
-        _require_type(optical_field["id"], str, f"{path}.id")
-        _require_type(optical_field["pulse_type"], str, f"{path}.pulse_type")
-        _require_type(optical_field["amplitude"], (int, float), f"{path}.amplitude")
-        _require_type(optical_field["frequency"], (int, float), f"{path}.frequency")
-        _require_type(optical_field["duration_fs"], (int, float), f"{path}.duration_fs")
-        _require_type(optical_field["t0_fs"], (int, float), f"{path}.t0_fs")
-
+        _require_type(optical_field['id'],str,f"{path}.id")
+        _require_type(optical_field['pulse_type'],str,f"{path}.pulse_type")
+        _require_type(optical_field['amplitude'],(int,float), f"{path}.amplitude")
+        _require_type(optical_field["duration_fs"], (int,float),f"{path}.duration_fs")
+        _require_type(optical_field["t0_fs"],(int,float),f"{path}.t0_fs")
+    
     return optical_fields
 
-
-def validate_dc_fields(dc_fields: list) -> list:
-    required_keys = ["id", "pulse_type", "amplitude", "t_on_fs", "t_off_fs"]
-    allowed_keys = required_keys
+def validate_dc_fields(dc_fields:dict) -> dict:
+    required_keys =  ["id", "pulse_type", "amplitude", "t_on_fs", "t_off_fs"]
+    allowed_keys = required_keys 
 
     for i, dc_field in enumerate(dc_fields):
         path = f"fields.dc[{i}]"
@@ -95,7 +154,6 @@ def validate_dc_fields(dc_fields: list) -> list:
         _require_type(dc_field["t_off_fs"], (int, float), f"{path}.t_off_fs")
 
     return dc_fields
-
 
 def validate_sweep(sweep: dict) -> dict:
     required_keys = ["strategy", "nest_by"]
