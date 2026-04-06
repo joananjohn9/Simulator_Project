@@ -37,21 +37,50 @@ def parse_yaml(path: Path) -> dict:
 # Run Expansion
 # ---------------------------
 def expand_runs(config: dict) -> list[dict]:
+    strategy = config["sweep"]["strategy"]
+
     optical_fields = config["fields"]["optical"]
     dc_fields = config["fields"]["dc"]
 
+    if strategy != "cartesian":
+        raise ValueError(f"Unsupported sweep strategy: {strategy}")
+
     runs = []
 
-    for opt in optical_fields:
-        for dc in dc_fields:
+    for optical_field in optical_fields:
+        for dc_field in dc_fields:
             runs.append(
                 {
-                    "optical": opt,
-                    "dc": dc,
+                    "optical": optical_field,
+                    "dc": dc_field,
                 }
             )
 
     return runs
+
+
+# ---------------------------
+# Output Directory Builder
+# ---------------------------
+def build_run_output_dir(run: dict, config: dict, base_output_dir: Path) -> Path:
+    nest_by = config["sweep"]["nest_by"]
+
+    optical_id = run["optical"]["id"]
+    dc_id = run["dc"]["id"]
+
+    optical_directory = f"optical_{optical_id}"
+    dc_directory = f"dc_{dc_id}"
+
+    if nest_by == "optical":
+        return base_output_dir / optical_directory / dc_directory
+
+    if nest_by == "dc":
+        return base_output_dir / dc_directory / optical_directory
+
+    if nest_by == "flat":
+        return base_output_dir / f"{optical_directory}__{dc_directory}"
+
+    raise ValueError(f"Unsupported nest_by value: {nest_by}")
 
 
 # ---------------------------
@@ -111,6 +140,25 @@ def make_json(run: dict, config: dict, output_dir: Path) -> Path:
 
 
 # ---------------------------
+# Optional metadata writer
+# ---------------------------
+def write_meta(run: dict, config: dict, output_dir: Path) -> Path:
+    meta_path = output_dir / "meta.json"
+
+    meta = {
+        "optical_id": run["optical"]["id"],
+        "dc_id": run["dc"]["id"],
+        "strategy": config["sweep"]["strategy"],
+        "nest_by": config["sweep"]["nest_by"],
+    }
+
+    with meta_path.open("w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2)
+
+    return meta_path
+
+
+# ---------------------------
 # Core Execution
 # ---------------------------
 def pass_to_core(json_path: Path, output_dir: Path) -> None:
@@ -134,17 +182,24 @@ def pass_to_core(json_path: Path, output_dir: Path) -> None:
 # ---------------------------
 def run_command(args) -> None:
     config_path = check_path(Path(args.config))
-    base_output_dir = Path(args.out)
 
     config_dict = parse_yaml(config_path)
     validated = validate_config(config_dict)
 
+    if getattr(args, "out", None):
+        base_output_dir = Path(args.out)
+    else:
+        base_output_dir = Path(validated["output"]["root_dir"])
+
     runs = expand_runs(validated)
 
-    for i, run in enumerate(runs):
-        run_dir = base_output_dir / f"run_{i}"
-
+    for run in runs:
+        run_dir = build_run_output_dir(run, validated, base_output_dir)
+        if (run_dir / "input.json").exists():
+            print(f"Skipping existing run: {run_dir}")
+            continue
         json_path = make_json(run, validated, run_dir)
+        write_meta(run, validated, run_dir)
         pass_to_core(json_path, run_dir)
 
     print(f"OK: executed {len(runs)} runs in {base_output_dir}")

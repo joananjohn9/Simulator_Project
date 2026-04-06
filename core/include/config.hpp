@@ -3,36 +3,35 @@
 #include <string>
 #include <vector>
 #include <optional>
-#include <unordered_map> 
-#include <filesystem>
 
-namespace fs = std::filesystem;
+
+
 
 struct OrderExpansionConfig {
 
     bool enabled = false;
-    int max_order = 3;
+    int max_order = 0;
     
 }; 
 
 struct GridConfig{
 
-    int k_points = 1000;
-    double dt_fs;
-    double t_start_fs;
-    double t_end_fs;
+    int k_points = 0.0;
+    double dt_fs = 0.0;
+    double t_start_fs = 0.0;
+    double t_end_fs = 0.0 ;
 
 
 };
 
 struct CoulombConfig{
-    bool enabled;
+    bool enabled = false;
     std::string screening = "none";
 };
 
 struct InteractionConfig{
 
-    Coulomb coulomb;
+    CoulombConfig coulomb;
 
    
 };
@@ -41,6 +40,7 @@ struct InteractionConfig{
 
 struct FieldConfig {
     
+    std::string id;
     std::string kind;
     std::string pulse_type; 
 
@@ -62,7 +62,7 @@ struct FieldConfig {
 
 struct OutputConfig{
     
-    std::string format;
+    std::string format = "binary";
 
     bool save_k_resolved = false;
     bool save_macroscopic = true;
@@ -74,7 +74,7 @@ struct OutputConfig{
 
 struct EngineConfig{
 
-    std::string schema_version;
+    std::string schema_version ="0.1";
     std::string model = "sbe";
 
     OrderExpansionConfig order_expansion;
@@ -82,7 +82,8 @@ struct EngineConfig{
     
     std::optional<InteractionConfig>  interactions;
 
-    std::vector<FieldConfig> fields;
+    std::optional<FieldConfig> optical;
+    std::optional<FieldConfig> dc;
 
     OutputConfig output;
 
