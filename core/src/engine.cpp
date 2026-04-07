@@ -1,23 +1,20 @@
 #include "engine.hpp"
 
-#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 
 namespace fs = std::filesystem;
 
-Engine::Engine(const std::string& input_json,
-               const std::string& output_dir)
-    : input_json_(input_json),
-      output_dir_(output_dir),
-      sim_output_dir_(output_dir)
+Engine::Engine(const fs::path& input_json_path,
+               const fs::path& output_dir_path)
+    : input_json_(input_json_path),
+      output_dir_(output_dir_path)
 {
     setup_paths();
     load_config();
-    run();
 }
 
-// ------- Set up Path --------
+// ------- Set up paths -------
 void Engine::setup_paths()
 {
     if (!fs::exists(input_json_)) {
@@ -43,16 +40,16 @@ void Engine::setup_paths()
     }
 }
 
-// --------- Load configuration --------
+// -------- Load configuration --------
 void Engine::load_config()
 {
     config_ = load_engine_config(input_json_.string());
 }
 
-// ------- RUN --------
+// ------------ Run ------------
 void Engine::run()
 {
-    const fs::path meta_path = sim_output_dir_ / "meta.json";
+    const fs::path meta_path = output_dir_ / "meta.json";
     std::ofstream meta(meta_path, std::ios::out | std::ios::trunc);
 
     if (!meta) {

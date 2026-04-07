@@ -11,7 +11,7 @@ def _reject_unknown_keys(section:dict, allowed_keys:list[str], path:str) -> None
 def _require_type(value,expected_type,path:str) -> None:
     if not isinstance(value,expected_type):
         if isinstance(expected_type, tuple):
-            expected_name = "or".joint(t.__name__ for t in expected_type)
+            expected_name = "or".join(t.__name__ for t in expected_type)
         else :
             expected_name = expected_type.__name__
         raise TypeError(f"{path} must be {expected_name}, got {type(value).__name__}")

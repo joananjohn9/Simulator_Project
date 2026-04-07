@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include <string>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 int main(int argc, char**   argv){
 
@@ -13,12 +16,13 @@ int main(int argc, char**   argv){
 
     } 
 
-    const std::string input_file = argv[1];
-    const std::string output_dir = argv[2];
+    fs::path input_file = argv[1];
+    fs::path output_dir = argv[2];
 
     try {
         Engine engine(input_file, output_dir);
         engine.run();
+        return 0;
     }
 
     catch(const std::exception& e){

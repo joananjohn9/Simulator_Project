@@ -41,7 +41,7 @@ fields:
 
 sweep:
   strategy: cartesian
-  nest_by: flat  # change to: dc or flat to test behavior
+  nest_by: optical  # change to: dc or flat to test behavior
 
 output:
   root_dir: output
