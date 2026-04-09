@@ -61,17 +61,17 @@ void Engine::run()
     meta << "{\n"
          << "  \"schema_version\": \"" << config_.schema_version << "\",\n"
          << "  \"model\": \"" << config_.model << "\",\n"
-         << "  \"k_points\": " << config_.grid.k_points << ",\n"
-         << "  \"dt_fs\": " << config_.grid.dt_fs;
+         << "  \"k_points\": " << config_.grid_config.k_points << ",\n"
+         << "  \"dt_fs\": " << config_.grid_config.dt_fs;
 
-    if (config_.optical.has_value()) {
+    if (config_.optical_config.has_value()) {
         meta << ",\n"
-             << "  \"optical_id\": \"" << config_.optical->id << "\"";
+             << "  \"optical_id\": \"" << config_.optical_config->id << "\"";
     }
 
-    if (config_.dc.has_value()) {
+    if (config_.dc_config.has_value()) {
         meta << ",\n"
-             << "  \"dc_id\": \"" << config_.dc->id << "\"";
+             << "  \"dc_id\": \"" << config_.dc_config->id << "\"";
     }
 
     meta << "\n}\n";

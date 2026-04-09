@@ -77,14 +77,14 @@ struct EngineConfig{
     std::string schema_version ="0.1";
     std::string model = "sbe";
 
-    OrderExpansionConfig order_expansion;
-    GridConfig grid;
+    OrderExpansionConfig order_expansion_config;
+    GridConfig grid_config;
     
-    std::optional<InteractionConfig>  interactions;
+    std::optional<InteractionConfig>  interactions_config;
 
-    std::optional<FieldConfig> optical;
-    std::optional<FieldConfig> dc;
+    std::optional<FieldConfig> optical_config;
+    std::optional<FieldConfig> dc_config;
 
-    OutputConfig output;
+    OutputConfig output_config;
 
 };

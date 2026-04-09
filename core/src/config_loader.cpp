@@ -156,10 +156,10 @@ EngineConfig load_engine_config(const std::string& input_json_path)
     engine_config.model =
         get_required<std::string>(input_json, "model");
 
-    engine_config.order_expansion =
+    engine_config.order_expansion_config =
         parse_order_expansion(input_json["order_expansion"]);
 
-    engine_config.grid =
+    engine_config.grid_config =
         parse_grid(input_json["grid"]);
 
     if (input_json.contains("interactions")) {
@@ -170,7 +170,7 @@ EngineConfig load_engine_config(const std::string& input_json_path)
                 parse_coulomb(input_json["interactions"]["coulomb"]);
         }
 
-        engine_config.interactions = interactions;
+        engine_config.interactions_config = interactions;
     }
 
     if (input_json.contains("fields")) {
@@ -178,26 +178,26 @@ EngineConfig load_engine_config(const std::string& input_json_path)
             FieldConfig field = parse_field(field_json);
 
             if (field.kind == "optical") {
-                if (engine_config.optical) {
+                if (engine_config.optical_config) {
                     throw std::runtime_error("Duplicate optical field in input JSON");
                 }
-                engine_config.optical = field;
+                engine_config.optical_config = field;
             } else if (field.kind == "dc") {
-                if (engine_config.dc) {
+                if (engine_config.dc_config) {
                     throw std::runtime_error("Duplicate dc field in input JSON");
                 }
-                engine_config.dc = field;
+                engine_config.dc_config = field;
             } else {
                 throw std::runtime_error("Unknown field kind: " + field.kind);
             }
         }
     }
 
-    if (!engine_config.optical && !engine_config.dc) {
+    if (!engine_config.optical_config && !engine_config.dc_config) {
         throw std::runtime_error("No optical or dc field found in input JSON");
     }
 
-    engine_config.output = parse_output(input_json["output"]);
+    engine_config.output_config = parse_output(input_json["output"]);
 
     return engine_config;
 }

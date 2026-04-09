@@ -5,15 +5,15 @@
 class Simulator{
 
     public:
+
+        //constructor 
         explicit Simulator(const EngineConfig& config);
-        Simulation run();
+        SimulationResult run();
     
     private:
         const EngineConfig& config_;
-
         std::vector<double> build_time_grid() const;
-        std::vector<double> build_place_holder_polarization(
-            const std::vector<double>& time_fs
-        ) const;
+        std::vector<double> build_k_grid() const;   
+           
 
 }
