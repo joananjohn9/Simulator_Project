@@ -16,4 +16,4 @@ class Simulator{
         std::vector<double> build_k_grid() const;   
            
 
-}
+};

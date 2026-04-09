@@ -6,6 +6,14 @@
 
 
 
+struct ModelConfig{
+
+    std::schema_version = "v.0.1";
+    std::string type = "sbe_1d";
+    double lattice_constant_A = 0.0;
+    double E_gap_eV = 0.0;
+
+};
 
 struct OrderExpansionConfig {
 
@@ -14,9 +22,16 @@ struct OrderExpansionConfig {
     
 }; 
 
+struct SimulationConfig{
+
+    ModelConfig model_config;
+    OrderExpansionConfig order_expansion_config;
+
+};
+
 struct GridConfig{
 
-    int k_points = 0.0;
+    int k_points = 0;
     double dt_fs = 0.0;
     double t_start_fs = 0.0;
     double t_end_fs = 0.0 ;
@@ -74,8 +89,7 @@ struct OutputConfig{
 
 struct EngineConfig{
 
-    std::string schema_version ="0.1";
-    std::string model = "sbe";
+    SimulationConfig simulation_config;
 
     OrderExpansionConfig order_expansion_config;
     GridConfig grid_config;

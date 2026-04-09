@@ -4,7 +4,11 @@ from pathlib import Path
 
 DEFAULT_CONFIG = """\
 simulation:
-  model: sbe
+  model: 
+    type: sbe_1d
+    lattice_constant_A: 55
+    E_gap_eV: .489
+
   order_expansion:
     enabled: true
     max_order: 3

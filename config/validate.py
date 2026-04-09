@@ -41,16 +41,23 @@ def validate_config(config_dict:dict) -> dict:
 def validate_simulation(simulation_dict:dict) -> dict :
     required_keys_simulation = ["model","order_expansion"]
     required_keys_order_exp = ["enabled","max_order"]
+    required_keys_model = ["type", "lattice_constant_A", "E_gap_eV"]
+
    
 
     _require_type(simulation_dict,dict,"simulation")
     _require_keys(simulation_dict,required_keys_simulation, "simulation")
     _reject_unknown_keys(simulation_dict,required_keys_simulation,"simulation")
 
-    _require_type(simulation_dict["model"],str,"simulation.model")
-    
-    _require_type(simulation_dict["order_expansion"],dict, "simulation.order_expansion")
+    _require_type(simulation_dict["model"],dict,"simulation.model") 
+    _require_keys(simulation_dict["model"],required_keys_model,"simulation.model")
+    _require_type(simulation_dict["model"]["type"], str, "simulation.model.type")
+    _require_type(simulation_dict["model"]["lattice_constant_A"],float,"simulation.model.lattice_constant")
+    _require_type(simulation_dict["model"]["E_gap_eV"],float,"simulation.model.E_gap_eV")
 
+    
+
+    _require_type(simulation_dict["order_expansion"],dict, "simulation.order_expansion")
     _require_keys(simulation_dict["order_expansion"],required_keys_order_exp, "simulation.order_expansion")
     _reject_unknown_keys(simulation_dict["order_expansion"],required_keys_order_exp, "simulation.order_expansion")
 
@@ -62,9 +69,9 @@ def validate_simulation(simulation_dict:dict) -> dict :
             f"simulation.order_expansion.max_order should be greater than or equal to zero"
         )
 
-    if simulation_dict["model"] != "sbe":
+    if simulation_dict["model"]["type"] != "sbe_1d":
         raise ValueError(
-            f"simulation.model must be 'sbe', got '{simulation_dict['model']}'"
+            f"simulation.model must be 'sbe_1d', got '{simulation_dict['model']['type']}'"
         )
 
     return simulation_dict
