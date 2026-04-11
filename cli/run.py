@@ -119,19 +119,14 @@ def make_json(run: dict, config: dict, output_dir: Path) -> Path:
     ]
 
     engine_json = {
-        "schema_version": "0.1",
-        "model": simulation["model"],
-        "order_expansion": simulation["order_expansion"],
-        "grid": {
-            "k_points": discretization["k_points"],
-            "dt_fs": discretization["dt_fs"],
-            "t_start_fs": discretization["t_start_fs"],
-            "t_end_fs": discretization["t_end_fs"],
-        },
-        "interactions": interactions,
-        "fields": fields,
-        "output": output_cfg,
-    }
+    "schema_version": "0.1",
+    "model": simulation["model"],
+    "order_expansion": simulation["order_expansion"],
+    "grid": {...},
+    "interactions": interactions,
+    "fields": fields,
+    "output": output_cfg,
+}
 
     with json_path.open("w", encoding="utf-8") as f:
         json.dump(engine_json, f, indent=2)
