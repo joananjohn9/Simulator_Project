@@ -63,6 +63,19 @@ json open_json_file(const std::string& input_json_path)
 // ---------------------------
 // PARSERS
 // ---------------------------
+ModelConfig parse_model(const json& model_json)
+{
+    ModelConfig model;
+
+    model.type = get_required<std::string>(model_json, "type");
+    model.lattice_constant_A =
+        get_required<double>(model_json, "lattice_constant_A");
+    model.E_gap_eV =
+        get_required<double>(model_json, "E_gap_eV");
+
+    return model;
+}
+
 OrderExpansionConfig parse_order_expansion(const json& order_json)
 {
     OrderExpansionConfig order_expansion;
@@ -71,6 +84,19 @@ OrderExpansionConfig parse_order_expansion(const json& order_json)
     order_expansion.max_order = get_required<int>(order_json, "max_order");
 
     return order_expansion;
+}
+
+SimulationConfig parse_simulation(const json& simulation_json)
+{
+    SimulationConfig simulation;
+
+    simulation.model_config =
+        parse_model(simulation_json.at("model"));
+
+    simulation.order_expansion_config =
+        parse_order_expansion(simulation_json.at("order_expansion"));
+
+    return simulation;
 }
 
 GridConfig parse_grid(const json& grid_json)
@@ -94,7 +120,8 @@ CoulombConfig parse_coulomb(const json& coulomb_json)
     }
 
     if (coulomb_json.contains("screening")) {
-        coulomb.screening = get_required<std::string>(coulomb_json, "screening");
+        coulomb.screening =
+            get_required<std::string>(coulomb_json, "screening");
     }
 
     return coulomb;
@@ -153,14 +180,11 @@ EngineConfig load_engine_config(const std::string& input_json_path)
     engine_config.schema_version =
         get_required<std::string>(input_json, "schema_version");
 
-    engine_config.model =
-        get_required<std::string>(input_json, "model");
-
-    engine_config.order_expansion_config =
-        parse_order_expansion(input_json["order_expansion"]);
+    engine_config.simulation_config =
+        parse_simulation(input_json.at("simulation"));
 
     engine_config.grid_config =
-        parse_grid(input_json["grid"]);
+        parse_grid(input_json.at("grid"));
 
     if (input_json.contains("interactions")) {
         InteractionConfig interactions;
@@ -197,7 +221,8 @@ EngineConfig load_engine_config(const std::string& input_json_path)
         throw std::runtime_error("No optical or dc field found in input JSON");
     }
 
-    engine_config.output_config = parse_output(input_json["output"]);
+    engine_config.output_config =
+        parse_output(input_json.at("output"));
 
     return engine_config;
 }

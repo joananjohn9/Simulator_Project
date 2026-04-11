@@ -119,20 +119,26 @@ def make_json(run: dict, config: dict, output_dir: Path) -> Path:
     ]
 
     engine_json = {
-    "schema_version": "0.1",
-    "model": simulation["model"],
-    "order_expansion": simulation["order_expansion"],
-    "grid": {...},
-    "interactions": interactions,
-    "fields": fields,
-    "output": output_cfg,
-}
+        "schema_version": "0.1",
+        "simulation": {
+            "model": simulation["model"],
+            "order_expansion": simulation["order_expansion"],
+        },
+        "grid": {
+            "k_points": discretization["k_points"],
+            "dt_fs": discretization["dt_fs"],
+            "t_start_fs": discretization["t_start_fs"],
+            "t_end_fs": discretization["t_end_fs"],
+        },
+        "interactions": interactions,
+        "fields": fields,
+        "output": output_cfg,
+    }
 
     with json_path.open("w", encoding="utf-8") as f:
         json.dump(engine_json, f, indent=2)
 
     return json_path
-
 
 # ---------------------------
 # Optional metadata writer
@@ -188,13 +194,23 @@ def run_command(args) -> None:
 
     runs = expand_runs(validated)
 
+    executed = 0
+    skipped = 0
+
     for run in runs:
         run_dir = build_run_output_dir(run, validated, base_output_dir)
+
         if (run_dir / "input.json").exists():
             print(f"Skipping existing run: {run_dir}")
+            skipped += 1
             continue
+
         json_path = make_json(run, validated, run_dir)
         write_meta(run, validated, run_dir)
         pass_to_core(json_path, run_dir)
+        executed += 1
 
-    print(f"OK: executed {len(runs)} runs in {base_output_dir}")
+    print(
+        f"OK: total={len(runs)}, executed={executed}, skipped={skipped}, "
+        f"base_output_dir={base_output_dir}"
+    )
