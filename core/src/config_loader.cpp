@@ -37,13 +37,10 @@ std::optional<T> get_optional(const json& j, const std::string& key)
     }
 }
 
-} // anonymous namespace
+} // namespace
 
 
-// ---------------------------
-// JSON FILE LOADER
-// ---------------------------
-json open_json_file(const std::string& input_json_path)
+static json open_json_file(const std::string& input_json_path)
 {
     std::ifstream input_json_file(input_json_path);
 
@@ -60,23 +57,19 @@ json open_json_file(const std::string& input_json_path)
 }
 
 
-// ---------------------------
-// PARSERS
-// ---------------------------
-ModelConfig parse_model(const json& model_json)
+static ModelConfig parse_model(const json& model_json)
 {
     ModelConfig model;
 
     model.type = get_required<std::string>(model_json, "type");
-    model.lattice_constant_A =
-        get_required<double>(model_json, "lattice_constant_A");
-    model.E_gap_eV =
-        get_required<double>(model_json, "E_gap_eV");
+    model.lattice_constant_A = get_required<double>(model_json, "lattice_constant_A");
+    model.E_gap_eV = get_required<double>(model_json, "E_gap_eV");
 
     return model;
 }
 
-OrderExpansionConfig parse_order_expansion(const json& order_json)
+
+static OrderExpansionConfig parse_order_expansion(const json& order_json)
 {
     OrderExpansionConfig order_expansion;
 
@@ -86,7 +79,8 @@ OrderExpansionConfig parse_order_expansion(const json& order_json)
     return order_expansion;
 }
 
-SimulationConfig parse_simulation(const json& simulation_json)
+
+static SimulationConfig parse_simulation(const json& simulation_json)
 {
     SimulationConfig simulation;
 
@@ -99,7 +93,8 @@ SimulationConfig parse_simulation(const json& simulation_json)
     return simulation;
 }
 
-GridConfig parse_grid(const json& grid_json)
+
+static GridConfig parse_grid(const json& grid_json)
 {
     GridConfig grid;
 
@@ -111,7 +106,8 @@ GridConfig parse_grid(const json& grid_json)
     return grid;
 }
 
-CoulombConfig parse_coulomb(const json& coulomb_json)
+
+static CoulombConfig parse_coulomb(const json& coulomb_json)
 {
     CoulombConfig coulomb;
 
@@ -120,14 +116,14 @@ CoulombConfig parse_coulomb(const json& coulomb_json)
     }
 
     if (coulomb_json.contains("screening")) {
-        coulomb.screening =
-            get_required<std::string>(coulomb_json, "screening");
+        coulomb.screening = get_required<std::string>(coulomb_json, "screening");
     }
 
     return coulomb;
 }
 
-FieldConfig parse_field(const json& field_json)
+
+static FieldConfig parse_field(const json& field_json)
 {
     FieldConfig field;
 
@@ -146,7 +142,8 @@ FieldConfig parse_field(const json& field_json)
     return field;
 }
 
-OutputConfig parse_output(const json& output_json)
+
+static OutputConfig parse_output(const json& output_json)
 {
     OutputConfig output;
 
@@ -168,9 +165,6 @@ OutputConfig parse_output(const json& output_json)
 }
 
 
-// ---------------------------
-// MAIN LOADER
-// ---------------------------
 EngineConfig load_engine_config(const std::string& input_json_path)
 {
     EngineConfig engine_config;

@@ -1,212 +1,211 @@
-def _require_keys(section:dict, required_keys:list[str], path:str) -> None:
-    for key in required_keys:
-        if key not in section:
-            raise KeyError(f"{path} is missing required key '{key}'.")
-
-def _reject_unknown_keys(section:dict, allowed_keys:list[str], path:str) -> None:
-    for key in section:
-        if key not in allowed_keys:
-            raise KeyError(f"{path} has unknown key '{key}'.")
-
-def _require_type(value,expected_type,path:str) -> None:
-    if not isinstance(value,expected_type):
-        if isinstance(expected_type, tuple):
-            expected_name = "or".join(t.__name__ for t in expected_type)
-        else :
-            expected_name = expected_type.__name__
-        raise TypeError(f"{path} must be {expected_name}, got {type(value).__name__}")
-
-def validate_config(config_dict:dict) -> dict:
-    required_keys = ["simulation","discretization","fields","sweep", "output"]
-
-    _require_type(config_dict,dict,"top-level config")
-    _require_keys(config_dict,required_keys, "config")
-
-    for key in required_keys:
-        _require_type(config_dict[key],dict,f"config.{key}")
+def _ensure_mapping(value, name: str) -> dict:
+    if not isinstance(value, dict):
+        raise TypeError(f"{name} must be a mapping (dict)")
+    return value
 
 
+def _ensure_number(value, name: str) -> None:
+    if not isinstance(value, (int, float)):
+        raise TypeError(f"{name} must be a number")
 
-    # Deeper validations    
-    validate_simulation(config_dict["simulation"])
-    validate_discretization(config_dict["discretization"])
-    fields=validate_fields(config_dict["fields"])
-    validate_optical_fields(fields["optical"])
-    validate_dc_fields(fields["dc"])
-    validate_sweep(config_dict["sweep"])
-    validate_output(config_dict["output"])
 
-    return config_dict
+def _ensure_string(value, name: str) -> None:
+    if not isinstance(value, str):
+        raise TypeError(f"{name} must be a string")
 
-def validate_simulation(simulation_dict:dict) -> dict :
-    required_keys_simulation = ["model","order_expansion"]
-    required_keys_order_exp = ["enabled","max_order"]
-    required_keys_model = ["type", "lattice_constant_A", "E_gap_eV"]
 
-   
+def validate_simulation(simulation_dict: dict) -> dict:
+    _ensure_mapping(simulation_dict, "simulation")
 
-    _require_type(simulation_dict,dict,"simulation")
-    _require_keys(simulation_dict,required_keys_simulation, "simulation")
-    _reject_unknown_keys(simulation_dict,required_keys_simulation,"simulation")
+    if "model" not in simulation_dict:
+        raise KeyError("simulation missing required key 'model'")
+    if "order_expansion" not in simulation_dict:
+        raise KeyError("simulation missing required key 'order_expansion'")
 
-    _require_type(simulation_dict["model"],dict,"simulation.model") 
-    _require_keys(simulation_dict["model"],required_keys_model,"simulation.model")
-    _require_type(simulation_dict["model"]["type"], str, "simulation.model.type")
-    _require_type(simulation_dict["model"]["lattice_constant_A"],float,"simulation.model.lattice_constant")
-    _require_type(simulation_dict["model"]["E_gap_eV"],float,"simulation.model.E_gap_eV")
+    model = _ensure_mapping(simulation_dict["model"], "simulation.model")
 
-    
+    required_model_keys = ["type", "lattice_constant_A", "E_gap_eV"]
+    for key in required_model_keys:
+        if key not in model:
+            raise KeyError(f"simulation.model missing required key '{key}'")
 
-    _require_type(simulation_dict["order_expansion"],dict, "simulation.order_expansion")
-    _require_keys(simulation_dict["order_expansion"],required_keys_order_exp, "simulation.order_expansion")
-    _reject_unknown_keys(simulation_dict["order_expansion"],required_keys_order_exp, "simulation.order_expansion")
+    _ensure_string(model["type"], "simulation.model.type")
+    _ensure_number(model["lattice_constant_A"], "simulation.model.lattice_constant_A")
+    _ensure_number(model["E_gap_eV"], "simulation.model.E_gap_eV")
 
-    _require_type(simulation_dict["order_expansion"]["enabled"], bool, "simulation.order_expansion.enabled")
-    _require_type(simulation_dict["order_expansion"]["max_order"], int, "simulation.order_expansion.max_order")
+    if model["lattice_constant_A"] <= 0:
+        raise ValueError("simulation.model.lattice_constant_A must be > 0")
 
-    if simulation_dict["order_expansion"]["max_order"] < 0:
-        raise ValueError(
-            f"simulation.order_expansion.max_order should be greater than or equal to zero"
-        )
+    if model["E_gap_eV"] < 0:
+        raise ValueError("simulation.model.E_gap_eV must be >= 0")
 
-    if simulation_dict["model"]["type"] != "sbe_1d":
-        raise ValueError(
-            f"simulation.model must be 'sbe_1d', got '{simulation_dict['model']['type']}'"
-        )
+    order = _ensure_mapping(simulation_dict["order_expansion"], "simulation.order_expansion")
+
+    if "enabled" not in order:
+        raise KeyError("simulation.order_expansion missing required key 'enabled'")
+    if not isinstance(order["enabled"], bool):
+        raise TypeError("simulation.order_expansion.enabled must be a bool")
+
+    if "max_order" not in order:
+        raise KeyError("simulation.order_expansion missing required key 'max_order'")
+    if not isinstance(order["max_order"], int):
+        raise TypeError("simulation.order_expansion.max_order must be an int")
+    if order["max_order"] < 0:
+        raise ValueError("simulation.order_expansion.max_order must be >= 0")
 
     return simulation_dict
 
+
 def validate_discretization(discretization_dict: dict) -> dict:
-    required_keys = ["k_points", "dt_fs", "t_start_fs", "t_end_fs"]
+    _ensure_mapping(discretization_dict, "discretization")
 
-    _require_type(discretization_dict, dict, "discretization")
-    _require_keys(discretization_dict, required_keys, "discretization")
-    _reject_unknown_keys(discretization_dict, required_keys, "discretization")
+    required = ["k_points", "dt_fs", "t_start_fs", "t_end_fs"]
+    for key in required:
+        if key not in discretization_dict:
+            raise KeyError(f"discretization missing required key '{key}'")
 
-    _require_type(discretization_dict["k_points"], int, "discretization.k_points")
-    _require_type(discretization_dict["dt_fs"], (int, float), "discretization.dt_fs")
-    _require_type(discretization_dict["t_start_fs"], (int, float), "discretization.t_start_fs")
-    _require_type(discretization_dict["t_end_fs"], (int, float), "discretization.t_end_fs")
-
+    if not isinstance(discretization_dict["k_points"], int):
+        raise TypeError("discretization.k_points must be an int")
     if discretization_dict["k_points"] <= 0:
-        raise ValueError("discretization.k_points must be greater than 0")
+        raise ValueError("discretization.k_points must be > 0")
+
+    _ensure_number(discretization_dict["dt_fs"], "discretization.dt_fs")
+    _ensure_number(discretization_dict["t_start_fs"], "discretization.t_start_fs")
+    _ensure_number(discretization_dict["t_end_fs"], "discretization.t_end_fs")
 
     if discretization_dict["dt_fs"] <= 0:
-        raise ValueError("discretization.dt_fs must be greater than 0")
+        raise ValueError("discretization.dt_fs must be > 0")
 
     if discretization_dict["t_end_fs"] <= discretization_dict["t_start_fs"]:
-        raise ValueError(
-            "discretization.t_end_fs must be greater than discretization.t_start_fs"
-        )
+        raise ValueError("discretization.t_end_fs must be greater than discretization.t_start_fs")
 
     return discretization_dict
 
-    
 
+def validate_fields(field_dict: dict) -> dict:
+    required_groups = ["optical", "dc"]
+    _ensure_mapping(field_dict, "fields")
 
+    for key in required_groups:
+        if key not in field_dict:
+            raise KeyError(f"fields missing required key '{key}'")
 
-    
+        group = field_dict[key]
+        if not isinstance(group, list):
+            raise TypeError(f"fields.{key} must be a list")
 
-def validate_fields(field_dict:dict) -> dict:
-    required_keys = ["optical","dc"]
+        if len(group) == 0:
+            raise ValueError(f"fields.{key} must not be empty")
 
-    _require_type(field_dict,dict,"fields")
-    _require_keys(field_dict,required_keys,"fields")
-    _reject_unknown_keys(field_dict,required_keys,"fields")
+        seen_ids = set()
 
-    for key in required_keys:
-        field_list =  field_dict[key]
-        _require_type(field_list,list,f"fields.{key}")
+        for i, field in enumerate(group):
+            if not isinstance(field, dict):
+                raise TypeError(f"fields.{key}[{i}] must be a dict")
 
-        if len(field_list) < 1:
-            raise ValueError(f"fields.{key} should not be empty")
+            if "id" not in field:
+                raise KeyError(f"fields.{key}[{i}] missing required key 'id'")
+            _ensure_string(field["id"], f"fields.{key}[{i}].id")
+            if field["id"] in seen_ids:
+                raise ValueError(f"Duplicate id in fields.{key}: {field['id']}")
+            seen_ids.add(field["id"])
 
-        for i,field in enumerate(field_list):
-            _require_type(field,dict,f"fields.{key}[{i}]")
-    
+            if "pulse_type" not in field:
+                raise KeyError(f"fields.{key}[{i}] missing required key 'pulse_type'")
+            _ensure_string(field["pulse_type"], f"fields.{key}[{i}].pulse_type")
+
+            if "amplitude" not in field:
+                raise KeyError(f"fields.{key}[{i}] missing required key 'amplitude'")
+            _ensure_number(field["amplitude"], f"fields.{key}[{i}].amplitude")
+
+            if key == "optical":
+                for req in ["frequency", "duration_fs", "t0_fs"]:
+                    if req not in field:
+                        raise KeyError(f"fields.optical[{i}] missing required key '{req}'")
+                    _ensure_number(field[req], f"fields.optical[{i}].{req}")
+
+                if field["duration_fs"] <= 0:
+                    raise ValueError(f"fields.optical[{i}].duration_fs must be > 0")
+
+            if key == "dc":
+                for req in ["t_on_fs", "t_off_fs"]:
+                    if req not in field:
+                        raise KeyError(f"fields.dc[{i}] missing required key '{req}'")
+                    _ensure_number(field[req], f"fields.dc[{i}].{req}")
+
+                if field["t_off_fs"] < field["t_on_fs"]:
+                    raise ValueError(f"fields.dc[{i}].t_off_fs must be >= t_on_fs")
+
     return field_dict
 
-def validate_optical_fields(optical_fields:dict) -> dict:
-    required_keys = ["id", "pulse_type", "amplitude","duration_fs","frequency","t0_fs"]
-    allowed_keys = required_keys 
 
-    for i, optical_field in enumerate(optical_fields):
-        path = f"fields.optical[{i}]"
+def validate_sweep(sweep_dict: dict) -> dict:
+    _ensure_mapping(sweep_dict, "sweep")
 
-        _require_keys(optical_field,required_keys,path)
-        _reject_unknown_keys(optical_field,allowed_keys,path) 
+    required = ["strategy", "nest_by"]
+    for key in required:
+        if key not in sweep_dict:
+            raise KeyError(f"sweep missing required key '{key}'")
+        _ensure_string(sweep_dict[key], f"sweep.{key}")
 
-        _require_type(optical_field['id'],str,f"{path}.id")
-        _require_type(optical_field['pulse_type'],str,f"{path}.pulse_type")
-        _require_type(optical_field['amplitude'],(int,float), f"{path}.amplitude")
-        _require_type(optical_field["duration_fs"], (int,float),f"{path}.duration_fs")
-        _require_type(optical_field["t0_fs"],(int,float),f"{path}.t0_fs")
-    
-    return optical_fields
+    allowed_strategies = {"cartesian"}
+    if sweep_dict["strategy"] not in allowed_strategies:
+        raise ValueError(f"Unsupported sweep.strategy: {sweep_dict['strategy']}")
 
-def validate_dc_fields(dc_fields:dict) -> dict:
-    required_keys =  ["id", "pulse_type", "amplitude", "t_on_fs", "t_off_fs"]
-    allowed_keys = required_keys 
+    allowed_nest_by = {"optical", "dc", "flat"}
+    if sweep_dict["nest_by"] not in allowed_nest_by:
+        raise ValueError(f"Unsupported sweep.nest_by: {sweep_dict['nest_by']}")
 
-    for i, dc_field in enumerate(dc_fields):
-        path = f"fields.dc[{i}]"
-
-        _require_keys(dc_field, required_keys, path)
-        _reject_unknown_keys(dc_field, allowed_keys, path)
-
-        _require_type(dc_field["id"], str, f"{path}.id")
-        _require_type(dc_field["pulse_type"], str, f"{path}.pulse_type")
-        _require_type(dc_field["amplitude"], (int, float), f"{path}.amplitude")
-        _require_type(dc_field["t_on_fs"], (int, float), f"{path}.t_on_fs")
-        _require_type(dc_field["t_off_fs"], (int, float), f"{path}.t_off_fs")
-
-    return dc_fields
-
-def validate_sweep(sweep: dict) -> dict:
-    required_keys = ["strategy", "nest_by"]
-    allowed_keys = required_keys
-    allowed_strategies = ["cartesian"]
-    allowed_nesting = ["optical", "dc", "flat"]
-
-    _require_keys(sweep, required_keys, "sweep")
-    _reject_unknown_keys(sweep, allowed_keys, "sweep")
-
-    _require_type(sweep["strategy"], str, "sweep.strategy")
-    _require_type(sweep["nest_by"], str, "sweep.nest_by")
-
-    if sweep["strategy"] not in allowed_strategies:
-        raise ValueError(
-            f"sweep.strategy must be one of {allowed_strategies}, got '{sweep['strategy']}'"
-        )
-
-    if sweep["nest_by"] not in allowed_nesting:
-        raise ValueError(
-            f"sweep.nest_by must be one of {allowed_nesting}, got '{sweep['nest_by']}'"
-        )
-
-    return sweep
+    return sweep_dict
 
 
-def validate_output(output: dict) -> dict:
-    required_keys = [
-        "root_dir",
-        "format",
-        "save_k_resolved",
-        "save_macroscopic",
-        "observables",
-    ]
-    allowed_keys = required_keys
+def validate_output(output_dict: dict) -> dict:
+    _ensure_mapping(output_dict, "output")
 
-    _require_keys(output, required_keys, "output")
-    _reject_unknown_keys(output, allowed_keys, "output")
+    required = ["root_dir", "format", "save_k_resolved", "save_macroscopic", "observables"]
+    for key in required:
+        if key not in output_dict:
+            raise KeyError(f"output missing required key '{key}'")
 
-    _require_type(output["root_dir"], str, "output.root_dir")
-    _require_type(output["format"], str, "output.format")
-    _require_type(output["save_k_resolved"], bool, "output.save_k_resolved")
-    _require_type(output["save_macroscopic"], bool, "output.save_macroscopic")
-    _require_type(output["observables"], list, "output.observables")
+    _ensure_string(output_dict["root_dir"], "output.root_dir")
+    _ensure_string(output_dict["format"], "output.format")
 
-    for i, observable in enumerate(output["observables"]):
-        _require_type(observable, str, f"output.observables[{i}]")
+    if not isinstance(output_dict["save_k_resolved"], bool):
+        raise TypeError("output.save_k_resolved must be a bool")
+    if not isinstance(output_dict["save_macroscopic"], bool):
+        raise TypeError("output.save_macroscopic must be a bool")
 
-    return output
+    if not isinstance(output_dict["observables"], list):
+        raise TypeError("output.observables must be a list")
+    if len(output_dict["observables"]) == 0:
+        raise ValueError("output.observables must not be empty")
+
+    for i, item in enumerate(output_dict["observables"]):
+        _ensure_string(item, f"output.observables[{i}]")
+
+    return output_dict
+
+
+def validate_config(config_dict: dict) -> dict:
+    required_top = ["simulation", "discretization", "fields", "sweep", "output"]
+
+    if not isinstance(config_dict, dict):
+        raise TypeError("Top-level YAML structure must be a mapping (dict)")
+
+    for key in required_top:
+        if key not in config_dict:
+            raise KeyError(f"Missing required section '{key}'")
+
+    config_dict["simulation"] = validate_simulation(config_dict["simulation"])
+    config_dict["discretization"] = validate_discretization(config_dict["discretization"])
+    config_dict["fields"] = validate_fields(config_dict["fields"])
+    config_dict["sweep"] = validate_sweep(config_dict["sweep"])
+    config_dict["output"] = validate_output(config_dict["output"])
+
+    if "interactions" in config_dict and not isinstance(config_dict["interactions"], dict):
+        raise TypeError("interactions must be a mapping (dict)")
+
+    if "analysis" in config_dict and not isinstance(config_dict["analysis"], dict):
+        raise TypeError("analysis must be a mapping (dict)")
+
+    return config_dict

@@ -1,4 +1,5 @@
 #include "engine.hpp"
+#include "config_loader.hpp"
 
 #include <fstream>
 #include <stdexcept>
@@ -8,13 +9,13 @@ namespace fs = std::filesystem;
 Engine::Engine(const fs::path& input_json_path,
                const fs::path& output_dir_path)
     : input_json_(input_json_path),
-      output_dir_(output_dir_path)
+      output_dir_(output_dir_path),
+      sim_output_dir_(output_dir_path / "sim_output")
 {
     setup_paths();
     load_config();
 }
 
-// ------- Set up paths -------
 void Engine::setup_paths()
 {
     if (!fs::exists(input_json_)) {
@@ -38,18 +39,18 @@ void Engine::setup_paths()
             "Output path is not a directory: " + output_dir_.string()
         );
     }
+
+    fs::create_directories(sim_output_dir_);
 }
 
-// -------- Load configuration --------
 void Engine::load_config()
 {
     config_ = load_engine_config(input_json_.string());
 }
 
-// ------------ Run ------------
 void Engine::run()
 {
-    const fs::path meta_path = output_dir_ / "meta.json";
+    const fs::path meta_path = sim_output_dir_ / "meta.json";
     std::ofstream meta(meta_path, std::ios::out | std::ios::trunc);
 
     if (!meta) {
@@ -60,18 +61,20 @@ void Engine::run()
 
     meta << "{\n"
          << "  \"schema_version\": \"" << config_.schema_version << "\",\n"
-         << "  \"model_type\": \"" 
+         << "  \"model_type\": \""
          << config_.simulation_config.model_config.type << "\",\n"
          << "  \"lattice_constant_A\": "
          << config_.simulation_config.model_config.lattice_constant_A << ",\n"
          << "  \"E_gap_eV\": "
          << config_.simulation_config.model_config.E_gap_eV << ",\n"
+         << "  \"k_points\": " << config_.grid_config.k_points << ",\n"
+         << "  \"dt_fs\": " << config_.grid_config.dt_fs << ",\n"
+         << "  \"t_start_fs\": " << config_.grid_config.t_start_fs << ",\n"
+         << "  \"t_end_fs\": " << config_.grid_config.t_end_fs << ",\n"
          << "  \"order_expansion_enabled\": "
          << (config_.simulation_config.order_expansion_config.enabled ? "true" : "false") << ",\n"
          << "  \"max_order\": "
-         << config_.simulation_config.order_expansion_config.max_order << ",\n"
-         << "  \"k_points\": " << config_.grid_config.k_points << ",\n"
-         << "  \"dt_fs\": " << config_.grid_config.dt_fs;
+         << config_.simulation_config.order_expansion_config.max_order;
 
     if (config_.optical_config.has_value()) {
         meta << ",\n"
@@ -83,5 +86,7 @@ void Engine::run()
              << "  \"dc_id\": \"" << config_.dc_config->id << "\"";
     }
 
-    meta << "\n}\n";
+    meta << ",\n"
+         << "  \"status\": \"dummy run\"\n"
+         << "}\n";
 }

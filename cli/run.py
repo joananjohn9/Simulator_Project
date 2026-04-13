@@ -6,9 +6,6 @@ import subprocess
 from config.validate import validate_config
 
 
-# ---------------------------
-# File Handling
-# ---------------------------
 def check_path(path: Path) -> Path:
     if not path.exists():
         raise FileNotFoundError(f"Configuration file doesn't exist at {path}")
@@ -33,9 +30,6 @@ def parse_yaml(path: Path) -> dict:
     return data
 
 
-# ---------------------------
-# Run Expansion
-# ---------------------------
 def expand_runs(config: dict) -> list[dict]:
     strategy = config["sweep"]["strategy"]
 
@@ -45,7 +39,7 @@ def expand_runs(config: dict) -> list[dict]:
     if strategy != "cartesian":
         raise ValueError(f"Unsupported sweep strategy: {strategy}")
 
-    runs = []
+    runs: list[dict] = []
 
     for optical_field in optical_fields:
         for dc_field in dc_fields:
@@ -59,9 +53,6 @@ def expand_runs(config: dict) -> list[dict]:
     return runs
 
 
-# ---------------------------
-# Output Directory Builder
-# ---------------------------
 def build_run_output_dir(run: dict, config: dict, base_output_dir: Path) -> Path:
     nest_by = config["sweep"]["nest_by"]
 
@@ -83,9 +74,6 @@ def build_run_output_dir(run: dict, config: dict, base_output_dir: Path) -> Path
     raise ValueError(f"Unsupported nest_by value: {nest_by}")
 
 
-# ---------------------------
-# JSON Builder (ONE run only)
-# ---------------------------
 def make_json(run: dict, config: dict, output_dir: Path) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / "input.json"
@@ -132,7 +120,12 @@ def make_json(run: dict, config: dict, output_dir: Path) -> Path:
         },
         "interactions": interactions,
         "fields": fields,
-        "output": output_cfg,
+        "output": {
+            "format": output_cfg["format"],
+            "save_k_resolved": output_cfg["save_k_resolved"],
+            "save_macroscopic": output_cfg["save_macroscopic"],
+            "observables": output_cfg["observables"],
+        },
     }
 
     with json_path.open("w", encoding="utf-8") as f:
@@ -140,11 +133,9 @@ def make_json(run: dict, config: dict, output_dir: Path) -> Path:
 
     return json_path
 
-# ---------------------------
-# Optional metadata writer
-# ---------------------------
-def write_meta(run: dict, config: dict, output_dir: Path) -> Path:
-    meta_path = output_dir / "meta.json"
+
+def write_run_meta(run: dict, config: dict, output_dir: Path) -> Path:
+    meta_path = output_dir / "run_meta.json"
 
     meta = {
         "optical_id": run["optical"]["id"],
@@ -159,9 +150,6 @@ def write_meta(run: dict, config: dict, output_dir: Path) -> Path:
     return meta_path
 
 
-# ---------------------------
-# Core Execution
-# ---------------------------
 def pass_to_core(json_path: Path, output_dir: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     engine_path = repo_root / "core" / "build" / "bin" / "sbe_engine"
@@ -178,9 +166,6 @@ def pass_to_core(json_path: Path, output_dir: Path) -> None:
     )
 
 
-# ---------------------------
-# Entry Point
-# ---------------------------
 def run_command(args) -> None:
     config_path = check_path(Path(args.config))
 
@@ -200,13 +185,13 @@ def run_command(args) -> None:
     for run in runs:
         run_dir = build_run_output_dir(run, validated, base_output_dir)
 
-        if (run_dir / "input.json").exists():
-            print(f"Skipping existing run: {run_dir}")
+        if (run_dir / "input.json").exists() and (run_dir / "sim_output" / "meta.json").exists():
+            print(f"Skipping existing completed run: {run_dir}")
             skipped += 1
             continue
 
         json_path = make_json(run, validated, run_dir)
-        write_meta(run, validated, run_dir)
+        write_run_meta(run, validated, run_dir)
         pass_to_core(json_path, run_dir)
         executed += 1
 

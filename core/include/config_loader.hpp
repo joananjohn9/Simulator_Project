@@ -1,6 +1,7 @@
-#pragma once 
+#pragma once
 
-#include<string>
-#include "config.hpp" 
+#include <string>
 
-EngineConfig load_engine_config(const std::string &input_json_path);
+#include "config.hpp"
+
+EngineConfig load_engine_config(const std::string& input_json_path);

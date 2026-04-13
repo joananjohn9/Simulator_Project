@@ -43,12 +43,10 @@ struct FieldConfig {
 
     double amplitude = 0.0;
 
-    // Optical-only
     std::optional<double> frequency;
     std::optional<double> duration_fs;
     std::optional<double> t0_fs;
 
-    // DC-only
     std::optional<double> t_on_fs;
     std::optional<double> t_off_fs;
 };
@@ -67,6 +65,7 @@ struct EngineConfig {
     GridConfig grid_config;
 
     std::optional<InteractionConfig> interactions_config;
+
     std::optional<FieldConfig> optical_config;
     std::optional<FieldConfig> dc_config;
 
