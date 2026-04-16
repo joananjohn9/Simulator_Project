@@ -1,5 +1,6 @@
 #include "engine.hpp"
 #include "config_loader.hpp"
+#include "Simulator.hpp"
 
 #include <fstream>
 #include <stdexcept>
@@ -14,6 +15,8 @@ Engine::Engine(const fs::path& input_json_path,
 {
     setup_paths();
     load_config();
+    Simulator bloch_simulator(config_);
+    
 }
 
 void Engine::setup_paths()
