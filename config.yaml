@@ -5,21 +5,20 @@ simulation:
     E_gap_eV: 0.489 # Band gap energy in eV
     deltaE_c_eV: 1.2
     deltaE_v_eV: 1.0
-    T_1_fs : 0 # Relaxation time
-    T_2_fs : 100 # Dephasing time in femto seconds 
-    mu_e_A : 1.5 # Dipole Moment in electron Angstroms
-    coulomb_constant : 201116300000000 # coulomb constant 
-  
- 
+    T_1_fs: 0 # Relaxation time
+    T_2_fs: 100 # Dephasing time in femto seconds
+    mu_e_A: 1.5 # Dipole Moment in electron Angstroms
+    coulomb_constant: 201116300000000 # coulomb constant
+
   order_expansion:
     enabled: true
     max_order: 3
 
 discretization:
-  k_points: 1000
+  k_points: 11
   dt_fs: 0.01
-  t_start_fs: -1000
-  t_end_fs: 2000
+  t_start_fs: -1
+  t_end_fs: 1
 
 interactions:
   coulomb:

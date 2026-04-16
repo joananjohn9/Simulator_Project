@@ -1,15 +1,16 @@
 #include "Simulator.hpp"
-#include "grid.cpp"
+#include "grid.hpp"
 
 #include <cmath>
 #include <stdexcept>
 #include <vector>
+#include <iostream> 
 
 Simulator::Simulator(const EngineConfig& config)
     : config_(config)
 
 {
-    Grid grid(config_);
+    Grid grid_data(config_);
 
     
     std::cout << "time points: " << grid_data.time_fs().size() << '\n';
