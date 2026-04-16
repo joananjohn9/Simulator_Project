@@ -15,7 +15,7 @@ target_sources(sbe_engine
     main.cpp
     src/engine.cpp
     src/config_loader.cpp
-    src/grid_data.cpp
+    src/grid.cpp
 )
 
 target_include_directories(sbe_engine

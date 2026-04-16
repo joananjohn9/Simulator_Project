@@ -1,44 +1,44 @@
-#include "grid_data.hpp"
+#include "grid.hpp"
 
 #include <cmath>
 #include <stdexcept>
 
-GridData::GridData(const EngineConfig& config)
+Grid::Grid(const EngineConfig& config)
 {
     build_time_grid(config.grid_config);
     build_k_grid(config.grid_config, config.simulation_config.model_config);
     build_bands(config.simulation_config.model_config);
 }
 
-const std::vector<double>& GridData::time_fs() const
+const std::vector<double>& Grid::time_fs() const
 {
     return time_fs_;
 }
 
-const std::vector<double>& GridData::k_grid() const
+const std::vector<double>& Grid::k_grid() const
 {
     return k_grid_;
 }
 
-const std::vector<double>& GridData::valence_band() const
+const std::vector<double>& Grid::valence_band() const
 {
     return valence_band_;
 }
 
-const std::vector<double>& GridData::conduction_band() const
+const std::vector<double>& Grid::conduction_band() const
 {
     return conduction_band_;
 }
 
-const double& GridData::dk() const{
+const double& Grid::dk() const{
     return dk_;
 }
 
-const double& GridData::two_dk() const {
+const double& Grid::two_dk() const {
     return two_dk_;
 }
 
-void GridData::build_time_grid(const GridConfig& grid_config)
+void Grid::build_time_grid(const GridConfig& grid_config)
 {
     const double t_start = grid_config.t_start_fs;
     const double t_end = grid_config.t_end_fs;
@@ -67,7 +67,7 @@ void GridData::build_time_grid(const GridConfig& grid_config)
     }
 }
 
-void GridData::build_k_grid(const GridConfig& grid_config,
+void Grid::build_k_grid(const GridConfig& grid_config,
                             const ModelConfig& model_config)
 {
     const int k_points = grid_config.k_points;
@@ -110,7 +110,7 @@ void GridData::build_k_grid(const GridConfig& grid_config,
     }
 }
 
-void GridData::build_bands(const ModelConfig& model_config)
+void Grid::build_bands(const ModelConfig& model_config)
 {
     const double E_gap = model_config.E_gap_eV;
     const double deltaE_c = model_config.deltaE_c_eV;

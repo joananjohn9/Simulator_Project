@@ -3,10 +3,10 @@
 #include <vector>
 #include "config.hpp"
 
-class GridData
+class Grid
 {
     public:
-        explicit GridData(const EngineConfig& config);
+        explicit Grid(const EngineConfig& config);
 
         const std::vector<double>& time_fs() const;
         const std::vector<double>& k_grid() const;
