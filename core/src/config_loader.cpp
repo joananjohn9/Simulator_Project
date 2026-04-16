@@ -62,8 +62,19 @@ static ModelConfig parse_model(const json& model_json)
     ModelConfig model;
 
     model.type = get_required<std::string>(model_json, "type");
-    model.lattice_constant_A = get_required<double>(model_json, "lattice_constant_A");
-    model.E_gap_eV = get_required<double>(model_json, "E_gap_eV");
+    model.lattice_constant_A =
+        get_required<double>(model_json, "lattice_constant_A");
+    model.E_gap_eV =
+        get_required<double>(model_json, "E_gap_eV");
+    model.deltaE_c_eV =
+        get_required<double>(model_json, "deltaE_c_eV");
+    model.deltaE_v_eV =
+        get_required<double>(model_json, "deltaE_v_eV");
+
+    model.T1_fs = get_required<double>(model_json,"T_1_fs");
+    model.T2_fs = get_required<double>(model_json,"T_2_fs");
+    model.mu_e_A = get_required<double>(model_json,"mu_e_A");
+    model.coulomb_constant = get_required<double>(model_json,"coulomb_constant");
 
     return model;
 }

@@ -4,11 +4,18 @@ from pathlib import Path
 
 DEFAULT_CONFIG = """\
 simulation:
-  model: 
-    type: sbe_1d
-    lattice_constant_A: 55
-    E_gap_eV: .489
-
+  model:
+    type: sbe_1d_tight_binding
+    lattice_constant_A: 5.5 #lattice constant in angstrom
+    E_gap_eV: 0.489 # Band gap energy in eV
+    deltaE_c_eV: 1.2
+    deltaE_v_eV: 1.0
+    T_1_fs : 0 # Relaxation time
+    T_2_fs : 100 # Dephasing time in femto seconds 
+    mu_e_A : 1.5 # Dipole Moment in electron Angstroms
+    coulomb_constant : 201116300000000 # coulomb constant 
+  
+ 
   order_expansion:
     enabled: true
     max_order: 3

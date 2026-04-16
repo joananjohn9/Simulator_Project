@@ -24,7 +24,17 @@ def validate_simulation(simulation_dict: dict) -> dict:
 
     model = _ensure_mapping(simulation_dict["model"], "simulation.model")
 
-    required_model_keys = ["type", "lattice_constant_A", "E_gap_eV"]
+    required_model_keys = [
+        "type",
+        "lattice_constant_A",
+        "E_gap_eV",
+        "deltaE_c_eV",
+        "deltaE_v_eV",
+        "T_1_fs",
+        "T_2_fs",
+        "mu_e_A",
+        "coulomb_constant"
+    ]
     for key in required_model_keys:
         if key not in model:
             raise KeyError(f"simulation.model missing required key '{key}'")
@@ -32,12 +42,25 @@ def validate_simulation(simulation_dict: dict) -> dict:
     _ensure_string(model["type"], "simulation.model.type")
     _ensure_number(model["lattice_constant_A"], "simulation.model.lattice_constant_A")
     _ensure_number(model["E_gap_eV"], "simulation.model.E_gap_eV")
+    _ensure_number(model["deltaE_c_eV"], "simulation.model.deltaE_c_eV")
+    _ensure_number(model["deltaE_v_eV"], "simulation.model.deltaE_v_eV")
+    _ensure_number(model["T_1_fs"], "simulation.model.T_1_fs")
+    _ensure_number(model["T_2_fs"], "simulation.model.T_2_fs")
+    _ensure_number(model["mu_e_A"], "simulation.model.mu_e_A")
+    _ensure_number(model["coulomb_constant"], "simulation.model.coulomb_constant")
+
 
     if model["lattice_constant_A"] <= 0:
         raise ValueError("simulation.model.lattice_constant_A must be > 0")
 
     if model["E_gap_eV"] < 0:
         raise ValueError("simulation.model.E_gap_eV must be >= 0")
+
+    if model["deltaE_c_eV"] < 0:
+        raise ValueError("simulation.model.deltaE_c_eV must be >= 0")
+
+    if model["deltaE_v_eV"] < 0:
+        raise ValueError("simulation.model.deltaE_v_eV must be >= 0")
 
     order = _ensure_mapping(simulation_dict["order_expansion"], "simulation.order_expansion")
 

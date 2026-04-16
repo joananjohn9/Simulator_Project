@@ -12,6 +12,8 @@ class GridData
         const std::vector<double>& k_grid() const;
         const std::vector<double>& valence_band() const;
         const std::vector<double>& conduction_band() const;
+        const double& dk() const;
+        const double& two_dk() const;
 
 
     private:
@@ -20,6 +22,8 @@ class GridData
         std::vector<double> valence_band_ ;
         std::vector<double> conduction_band_;
         std::vector<double> NL,NR; // Nearest left and right neighbour needed to find the Gradient
+        double dk_ ;
+        double two_dk_ ;
 
         void build_time_grid(const GridConfig& grid_config);
         void build_k_grid(const GridConfig& grid_config,

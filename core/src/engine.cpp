@@ -60,21 +60,26 @@ void Engine::run()
     }
 
     meta << "{\n"
-         << "  \"schema_version\": \"" << config_.schema_version << "\",\n"
-         << "  \"model_type\": \""
-         << config_.simulation_config.model_config.type << "\",\n"
-         << "  \"lattice_constant_A\": "
-         << config_.simulation_config.model_config.lattice_constant_A << ",\n"
-         << "  \"E_gap_eV\": "
-         << config_.simulation_config.model_config.E_gap_eV << ",\n"
-         << "  \"k_points\": " << config_.grid_config.k_points << ",\n"
-         << "  \"dt_fs\": " << config_.grid_config.dt_fs << ",\n"
-         << "  \"t_start_fs\": " << config_.grid_config.t_start_fs << ",\n"
-         << "  \"t_end_fs\": " << config_.grid_config.t_end_fs << ",\n"
-         << "  \"order_expansion_enabled\": "
-         << (config_.simulation_config.order_expansion_config.enabled ? "true" : "false") << ",\n"
-         << "  \"max_order\": "
-         << config_.simulation_config.order_expansion_config.max_order;
+        << "  \"schema_version\": \"" << config_.schema_version << "\",\n"
+        << "  \"model_type\": \""
+        << config_.simulation_config.model_config.type << "\",\n"
+        << "  \"lattice_constant_A\": "
+        << config_.simulation_config.model_config.lattice_constant_A << ",\n"
+        << "  \"E_gap_eV\": "
+        << config_.simulation_config.model_config.E_gap_eV << ",\n"
+        << "  \"deltaE_c_eV\": "
+        << config_.simulation_config.model_config.deltaE_c_eV << ",\n"
+        << "  \"deltaE_v_eV\": "
+        << config_.simulation_config.model_config.deltaE_v_eV << ",\n"
+        << "  \"k_points\": " << config_.grid_config.k_points << ",\n"
+        << "  \"dt_fs\": " << config_.grid_config.dt_fs << ",\n"
+        << "  \"t_start_fs\": " << config_.grid_config.t_start_fs << ",\n"
+        << "  \"t_end_fs\": " << config_.grid_config.t_end_fs << ",\n"
+        << "  \"order_expansion_enabled\": "
+        << (config_.simulation_config.order_expansion_config.enabled ? "true" : "false") << ",\n"
+        << "  \"max_order\": "
+       
+        << "  \"n_k_points\": " << config_.grid_config.k_points;
 
     if (config_.optical_config.has_value()) {
         meta << ",\n"

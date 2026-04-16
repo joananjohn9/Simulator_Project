@@ -5,9 +5,16 @@
 #include <vector>
 
 struct ModelConfig {
-    std::string type = "sbe_1d";
+    std::string type = "sbe_1d_tight_binding";
     double lattice_constant_A = 0.0;
     double E_gap_eV = 0.0;
+    double deltaE_c_eV = 0.0;
+    double deltaE_v_eV = 0.0;
+    double T1_fs = 0;
+    double T2_fs = 100; //default to 100fs
+    double mu_e_A = 1.5; //default value of dipole moment
+    double coulomb_constant = 201116300000000; // Default coulomb constant value
+    
 };
 
 struct OrderExpansionConfig {
