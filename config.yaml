@@ -39,7 +39,13 @@ fields:
       pulse_type: box
       amplitude: 0.002
       t_on_fs: -500
-      t_off_fs: 1500
+      t_off_fs: 500
+
+    - id: dc_2
+      pulse_type: box
+      amplitude: 0.006
+      t_on_fs: -500
+      t_off_fs: 500
 
 sweep:
   strategy: cartesian

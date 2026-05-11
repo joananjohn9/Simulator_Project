@@ -1,3 +1,4 @@
+from os import replace
 from pathlib import Path
 import yaml
 import json
@@ -58,9 +59,13 @@ def build_run_output_dir(run: dict, config: dict, base_output_dir: Path) -> Path
 
     optical_id = run["optical"]["id"]
     dc_id = run["dc"]["id"]
+    optical_amplitude = format_value(run["optical"]["amplitude"])
+    optical_frequency = format_value(run["optical"]["frequency"])
+    dc_amplitude = format_value(run["dc"]["amplitude"])
 
-    optical_directory = f"optical_{optical_id}"
-    dc_directory = f"dc_{dc_id}"
+
+    optical_directory = f"optical_{optical_id}_A_{optical_amplitude}_W_{optical_frequency}"
+    dc_directory = f"dc_{dc_id}_A_{dc_amplitude}"
 
     if nest_by == "optical":
         return base_output_dir / optical_directory / dc_directory
@@ -149,6 +154,11 @@ def write_run_meta(run: dict, config: dict, output_dir: Path) -> Path:
 
     return meta_path
 
+
+def format_value(value: float, precision:int=3) -> str:
+    formatted_value = f"{value:{precision}f}"
+    formatted_value = formatted_value.replace(".","p").replace("-","m")
+    return formatted_value 
 
 def pass_to_core(json_path: Path, output_dir: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]

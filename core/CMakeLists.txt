@@ -18,6 +18,7 @@ target_sources(sbe_engine
     src/config_loader.cpp
     src/grid.cpp
     src/Simulator.cpp 
+    src/table_writer.cpp
 )
 
 target_include_directories(sbe_engine

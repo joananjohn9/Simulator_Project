@@ -1,5 +1,5 @@
 #include "grid.hpp"
-
+#include "table_writer.hpp"
 #include <cmath>
 #include <stdexcept>
 

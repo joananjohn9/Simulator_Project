@@ -12,8 +12,7 @@ class Simulator{
     
     private:
         const EngineConfig& config_;
-        std::vector<double> build_time_grid() const;
-        std::vector<double> build_k_grid() const;   
+          
            
 
 };

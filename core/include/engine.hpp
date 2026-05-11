@@ -22,4 +22,5 @@ private:
 
     void setup_paths();
     void load_config();
+    void write_meta(); 
 };
