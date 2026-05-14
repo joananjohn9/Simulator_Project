@@ -156,9 +156,9 @@ def write_run_meta(run: dict, config: dict, output_dir: Path) -> Path:
 
 
 def format_value(value: float, precision:int=3) -> str:
-    formatted_value = f"{value:{precision}f}"
+    formatted_value = f"{value:.{precision}f}"
     formatted_value = formatted_value.replace(".","p").replace("-","m")
-    return formatted_value 
+    return formatted_value  
 
 def pass_to_core(json_path: Path, output_dir: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]

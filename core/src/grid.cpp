@@ -1,5 +1,5 @@
 #include "grid.hpp"
-#include "table_writer.hpp"
+
 #include <cmath>
 #include <stdexcept>
 
@@ -39,10 +39,15 @@ const double& Grid::two_dk() const {
 }
 
 void Grid::build_time_grid(const GridConfig& grid_config)
-{
+
+{   
+    constexpr double fs_to_s = 1e-15;
     const double t_start = grid_config.t_start_fs;
     const double t_end = grid_config.t_end_fs;
     const double dt = grid_config.dt_fs;
+
+    const double t_start_s = t_start*fs_to_s;
+    const double dt_s = dt*fs_to_s;
 
     if (t_end <= t_start) {
         throw std::runtime_error(
@@ -63,7 +68,7 @@ void Grid::build_time_grid(const GridConfig& grid_config)
     time_fs_.reserve(n_points);
 
     for (std::size_t i = 0; i < n_points; ++i) {
-        time_fs_.push_back(t_start + static_cast<double>(i) * dt);
+        time_fs_.push_back(t_start_s + static_cast<double>(i) * dt_s);
     }
 }
 

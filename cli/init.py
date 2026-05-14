@@ -36,7 +36,7 @@ fields:
     - id: opt_1
       pulse_type: gaussian
       amplitude: 0.01
-      frequency: 0.3
+      frequency: 0.3 #NOTE : Frequency currently stores angular frequency wL in will need to be changed later. 
       duration_fs: 100
       t0_fs: 0
 
