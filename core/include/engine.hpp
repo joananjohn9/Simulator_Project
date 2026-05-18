@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "SimulationResult.hpp"
 #include "config.hpp"
 
 namespace fs = std::filesystem;
@@ -23,4 +24,5 @@ private:
     void setup_paths();
     void load_config();
     void write_meta(); 
+    void write_results(const SimulationResult& result);
 };

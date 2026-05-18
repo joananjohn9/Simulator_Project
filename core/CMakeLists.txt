@@ -19,6 +19,7 @@ target_sources(sbe_engine
     src/grid.cpp
     src/Simulator.cpp 
     src/table_writer.cpp
+    src/field_builder.cpp
 )
 
 target_include_directories(sbe_engine

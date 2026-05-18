@@ -1,8 +1,10 @@
 #include "engine.hpp"
+#include "SimulationResult.hpp"
 #include "config_loader.hpp"
 #include "Simulator.hpp"
 #include "table_writer.hpp"
 #include "nlohmann/json.hpp"
+#include "field_builder.hpp"
 
 #include <fstream>
 #include <stdexcept>
@@ -59,29 +61,9 @@ void Engine::run()
 
     SimulationResult result = bloch_simulator.run();
 
-    write_table_tsv(
-        {
-            {"time_fs", result.time_fs}
-        },
-        sim_output_dir_ / "time_grid.dat"
-    );
 
-    write_table_tsv(
-        {
-            {"k", result.k_grid}
-        },
-        sim_output_dir_ / "k_grid.dat"
-    );
 
-    write_table_tsv(
-        {
-            {"k", result.k_grid},
-            {"E_v", result.valence_band},
-            {"E_c", result.conduction_band}
-        },
-        sim_output_dir_ / "bands.dat"
-    );
-
+    write_results(result);
     write_meta();
 }
 
@@ -161,7 +143,10 @@ void Engine::write_meta()
     meta["outputs"] = {
         "time_grid.dat",
         "k_grid.dat",
-        "bands.dat"
+        "bands.dat",
+        "optical_field.dat",
+        "dc_field.dat"
+
     };
 
     std::ofstream out(meta_path, std::ios::out | std::ios::trunc);
@@ -174,4 +159,48 @@ void Engine::write_meta()
     }
 
     out << meta.dump(2) << '\n';
+}
+
+void Engine::write_results(const SimulationResult& result)
+{
+    write_table_tsv(
+        {
+            {"time_s", result.time_s}
+        },
+        sim_output_dir_ / "time_grid.dat"
+    );
+
+    write_table_tsv(
+        {
+            {"k", result.k_grid}
+        },
+        sim_output_dir_ / "k_grid.dat"
+    );
+
+    write_table_tsv(
+        {
+            {"k", result.k_grid},
+            {"E_v", result.valence_band},
+            {"E_c", result.conduction_band}
+        },
+        sim_output_dir_ / "bands.dat"
+    ); 
+    
+    write_table_tsv(
+        {
+            {"time_s", result.time_s},
+            {"E_opt_V_per_m", result.fields.optical_t}
+
+        }, 
+        sim_output_dir_/"optical_field.dat"
+    );
+
+    write_table_tsv(
+        {
+            {"time_s", result.time_s},
+            {"E_dc_V_per_m", result.fields.dc_t}
+        },
+        sim_output_dir_/"dc_field.dat"
+    );
+
 }

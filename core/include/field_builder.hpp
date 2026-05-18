@@ -19,7 +19,7 @@ struct FieldSamples{
 
 };
 
-FieldSamples buld_field_samples(const std::vector<double>& time_fs,
-    double dt_fs,
+FieldSamples build_field_samples(const std::vector<double>& time_s,
+    double dt_s,
     const FieldConfig &optical,
     const FieldConfig & dc);

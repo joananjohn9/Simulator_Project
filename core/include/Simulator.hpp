@@ -16,6 +16,8 @@ class Simulator{
     private:
         const EngineConfig& config_;
         Grid grid_;
+        
+        void validate_required_fields() const;
           
            
 
