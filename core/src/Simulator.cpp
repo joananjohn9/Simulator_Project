@@ -1,8 +1,11 @@
 #include "Simulator.hpp"
+#include "SBEState.hpp"
+#include "SimulationResult.hpp"
 #include "field_builder.hpp"
 #include "grid.hpp"
 
 
+#include <cstddef>
 #include <vector>
 #include <stdexcept>
 
@@ -42,6 +45,17 @@ SimulationResult Simulator::run(){
         config_.dc_config.value()
     );
 
+    SBEState state = make_initial_state(config_.grid_config.k_points);
+
+    reserve_macroscopic_outputs(result);
+
+    for(std::size_t ti=0; ti < result.time_s.size(); ti++)
+    {
+        append_zero_observables(result);
+    }
+
+
+
     
     
     return result;
@@ -63,4 +77,45 @@ void Simulator::validate_required_fields() const {
     {
         throw std::runtime_error("Simulator:: run Missing dc field config");
     }
+}// end of validate required field function 
+
+
+
+SBEState Simulator::make_initial_state(std::size_t k_points) const{
+
+    SBEState state;
+
+    state.p_k.assign(k_points,std::complex<double> (0.0,0.0));
+    state.n_k.assign(k_points,std::complex<double> (0.0,0.0));
+
+    return state;
+
+}
+
+void Simulator::reserve_macroscopic_outputs(SimulationResult& result) const{
+
+    std::size_t n_t = result.time_s.size();
+
+    result.P_real.reserve(n_t);
+    result.P_imag.reserve(n_t);
+
+    result.n_real.reserve(n_t);
+    result.n_imag.reserve(n_t);
+
+    result.J_real.reserve(n_t);
+    result.J_imag.reserve(n_t);
+
+}
+
+
+void Simulator::append_zero_observables(SimulationResult& result) const
+{
+    result.P_real.push_back(0.0);
+    result.P_imag.push_back(0.0);
+
+    result.n_real.push_back(0.0);
+    result.n_imag.push_back(0.0);
+
+    result.J_real.push_back(0.0);
+    result.J_imag.push_back(0.0);
 }

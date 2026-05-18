@@ -30,7 +30,7 @@ fields:
     - id: opt_1
       pulse_type: gaussian
       amplitude: 0.01
-      frequency: 0.3 # Note this is angular frequency in rad/s so be careful with this
+      frequency: 0.3 # Photon energy in eV converted to angular frequency internally
       duration_fs: 100
       t0_fs: 0
 

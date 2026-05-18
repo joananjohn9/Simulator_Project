@@ -74,7 +74,7 @@ void Engine::write_meta()
     json meta;
 
     meta["schema_version"] = config_.schema_version;
-    meta["status"] = "grid_debug";
+    meta["status"] = "grid_field_and_result_debug";
 
     meta["model"] = {
         {"type", config_.simulation_config.model_config.type},
@@ -145,7 +145,10 @@ void Engine::write_meta()
         "k_grid.dat",
         "bands.dat",
         "optical_field.dat",
-        "dc_field.dat"
+        "dc_field.dat",
+        "P.dat",
+        "n.dat",
+        "J.dat"
 
     };
 
@@ -201,6 +204,39 @@ void Engine::write_results(const SimulationResult& result)
             {"E_dc_V_per_m", result.fields.dc_t}
         },
         sim_output_dir_/"dc_field.dat"
+    );
+
+    write_table_tsv(
+        {
+            {"time_s", result.time_s},
+            {"P_real", result.P_real},
+            {"P_imag", result.P_imag}
+
+        },
+        sim_output_dir_/"P.dat"
+
+    );
+
+      write_table_tsv(
+        {
+            {"time_s", result.time_s},
+            {"n_real", result.n_real},
+            {"n_imag", result.n_imag}
+
+        },
+        sim_output_dir_/"n.dat"
+
+    );
+
+      write_table_tsv(
+        {
+            {"time_s", result.time_s},
+            {"J_real", result.J_real},
+            {"J_imag", result.J_imag}
+
+        },
+        sim_output_dir_/"J.dat"
+
     );
 
 }
