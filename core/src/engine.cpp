@@ -4,7 +4,6 @@
 #include "Simulator.hpp"
 #include "table_writer.hpp"
 #include "nlohmann/json.hpp"
-#include "field_builder.hpp"
 
 #include <fstream>
 #include <stdexcept>

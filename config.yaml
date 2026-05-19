@@ -1,13 +1,13 @@
 simulation:
   model:
     type: sbe_1d_tight_binding
-    lattice_constant_A: 5.5 #lattice constant in angstrom
-    E_gap_eV: 0.489 # Band gap energy in eV
+    lattice_constant_A: 3.18 #lattice constant in angstrom
+    E_gap_eV: 2.298 # Band gap energy in eV
     deltaE_c_eV: 1.2
     deltaE_v_eV: 1.0
     T_1_fs: 0 # Relaxation time
     T_2_fs: 100 # Dephasing time in femto seconds
-    mu_e_A: 1.5 # Dipole Moment in electron Angstroms
+    mu_e_A: 1.53 # Dipole Moment in electron Angstroms
     coulomb_constant: 201116300000000 # coulomb constant
 
   order_expansion:
@@ -18,7 +18,7 @@ discretization:
   k_points: 1001
   dt_fs: 0.01
   t_start_fs: -1000
-  t_end_fs: 2000
+  t_end_fs: 1000
 
 interactions:
   coulomb:
@@ -29,8 +29,8 @@ fields:
   optical:
     - id: opt_1
       pulse_type: gaussian
-      amplitude: 0.01
-      frequency: 0.3 # Photon energy in eV converted to angular frequency internally
+      amplitude: 1.00
+      frequency: 2.298 # Photon energy in eV converted to angular frequency internally
       duration_fs: 100
       t0_fs: 0
 

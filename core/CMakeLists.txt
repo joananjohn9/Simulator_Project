@@ -20,6 +20,7 @@ target_sources(sbe_engine
     src/Simulator.cpp 
     src/table_writer.cpp
     src/field_builder.cpp
+    src/sbe_rhs.cpp
 )
 
 target_include_directories(sbe_engine
