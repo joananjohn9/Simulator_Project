@@ -27,28 +27,15 @@ Simulator::Simulator(const EngineConfig& config)
 
 SimulationResult Simulator::run(){
 
-    SimulationResult result;
 
-    result.time_s = grid_.time_s();
-    result.k_grid = grid_.k_grid();
-    result.valence_band = grid_.valence_band();
-    result.conduction_band = grid_.conduction_band();   
+    //Initialize Simulation result
+    SimulationResult result = initialize_result(); 
 
-    validate_required_fields();
-
-    const double dt_s = config_.grid_config.dt_fs * 1e-15;
-
-    result.fields = build_field_samples(
-        result.time_s,
-        dt_s,
-        config_.optical_config.value(),
-        config_.dc_config.value()
-    );
-
+    //Initialize SBE state 
     SBEState state = make_initial_state(config_.grid_config.k_points);
 
-    reserve_macroscopic_outputs(result);
 
+    // Dummy run : Append every thing with zero
     for(std::size_t ti=0; ti < result.time_s.size(); ti++)
     {
         append_zero_observables(result);
@@ -118,4 +105,31 @@ void Simulator::append_zero_observables(SimulationResult& result) const
 
     result.J_real.push_back(0.0);
     result.J_imag.push_back(0.0);
+}
+
+SimulationResult Simulator::initialize_result()
+{
+    validate_required_fields();
+
+
+    SimulationResult result;
+
+    result.time_s = grid_.time_s();
+    result.k_grid = grid_.k_grid();
+    result.valence_band = grid_.valence_band();
+    result.conduction_band = grid_.conduction_band();   
+
+  
+    const double dt_s = config_.grid_config.dt_fs * 1e-15;
+
+    result.fields = build_field_samples(
+        result.time_s,
+        dt_s,
+        config_.optical_config.value(),
+        config_.dc_config.value()
+    );
+
+    SBEState state = make_initial_state(config_.grid_config.k_points);
+
+    reserve_macroscopic_outputs(result);
 }

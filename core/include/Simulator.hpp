@@ -29,6 +29,8 @@ class Simulator{
         SBEState make_initial_state(std::size_t k_points) const; 
         void reserve_macroscopic_outputs(SimulationResult& result) const;
         void append_zero_observables(SimulationResult& result) const;
+        SimulationResult initialize_result();
+
         
 
           
