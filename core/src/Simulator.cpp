@@ -3,6 +3,7 @@
 #include "SimulationResult.hpp"
 #include "field_builder.hpp"
 #include "sbe_rhs.hpp"
+#include "rk_integrator.hpp"
 
 #include <complex>
 #include <cstddef>
@@ -28,22 +29,15 @@ SimulationResult Simulator::run()
     const double dt_s = config_.grid_config.dt_fs*1.0e-15;
 
     for (std::size_t ti = 0; ti < result.time_s.size(); ++ti) {
-
-        const double E_t = result.fields.optical_t[ti] ;
-
-        compute_rhs_simple(
-            state,
-            rhs,
-            omega_k,
-            E_t,
-            config_.simulation_config.model_config
-        );
-
-        for(std::size_t k = 0; k < state.p_k.size(); ++k){
-            
-            state.p_k[k] += dt_s*rhs.p_k[k];
-            state.n_k[k] += dt_s * rhs.n_k[k] ;
-        }
+        rk4_step_simple(
+        state,
+        omega_k,
+        result.fields.optical_t[ti],
+        result.fields.optical_half[ti],
+        result.fields.optical_next[ti],
+        dt_s,
+        config_.simulation_config.model_config
+    );
         
         const Macroscopic_observables obs = compute_macroscopic_observables(state);
 
