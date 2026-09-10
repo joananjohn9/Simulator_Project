@@ -24,7 +24,7 @@ SimulationResult Simulator::run()
     std::vector<double> omega_k = compute_transition_frequencies(result.conduction_band,
          result.valence_band);
 
-    SBEState rhs = make_initial_state(result.k_grid.size());
+    
 
     const double dt_s = config_.grid_config.dt_fs*1.0e-15;
 
@@ -86,17 +86,7 @@ void Simulator::reserve_macroscopic_outputs(SimulationResult& result) const
     result.J_imag.reserve(n_t);
 }
 
-void Simulator::append_zero_observables(SimulationResult& result) const
-{
-    result.P_real.push_back(0.0);
-    result.P_imag.push_back(0.0);
 
-    result.n_real.push_back(0.0);
-    result.n_imag.push_back(0.0);
-
-    result.J_real.push_back(0.0);
-    result.J_imag.push_back(0.0);
-}
 
 SimulationResult Simulator::initialize_result()
 {

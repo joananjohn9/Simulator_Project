@@ -174,14 +174,14 @@ void Engine::write_results(const SimulationResult& result)
 
     write_table_tsv(
         {
-            {"k", result.k_grid}
+            {"k_1_per_m", result.k_grid}
         },
         sim_output_dir_ / "k_grid.dat"
     );
 
     write_table_tsv(
         {
-            {"k", result.k_grid},
+            {"k_1_per_m", result.k_grid},
             {"E_v", result.valence_band},
             {"E_c", result.conduction_band}
         },
@@ -200,7 +200,7 @@ void Engine::write_results(const SimulationResult& result)
     write_table_tsv(
         {
             {"time_s", result.time_s},
-            {"E_dc_V_per_m", result.fields.dc_t}
+            {"F_dc_V_per_m", result.fields.dc_t}
         },
         sim_output_dir_/"dc_field.dat"
     );

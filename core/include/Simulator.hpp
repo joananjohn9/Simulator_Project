@@ -34,13 +34,12 @@ class Simulator{
         // Data members
         const EngineConfig& config_;
         Grid grid_;
-        Macroscopic_observables obs;
+       
         
 
         //Helper-Private Functions
         void validate_required_fields() const;        
         void reserve_macroscopic_outputs(SimulationResult& result) const;
-        void append_zero_observables(SimulationResult& result) const;
         void append_observables(SimulationResult& result, const Macroscopic_observables& obs) const;
 
 

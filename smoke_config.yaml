@@ -1,0 +1,56 @@
+simulation:
+  model:
+    type: sbe_1d_tight_binding
+    lattice_constant_A: 3.18
+    E_gap_eV: 2.298
+    deltaE_c_eV: 1.2
+    deltaE_v_eV: 1.0
+    T_1_fs: 0
+    T_2_fs: 100
+    mu_e_A: 1.53
+    coulomb_constant: 201116300000000
+
+  order_expansion:
+    enabled: false
+    max_order: 0
+
+discretization:
+  k_points: 101
+  dt_fs: 0.05
+  t_start_fs: -100
+  t_end_fs: 100
+
+interactions:
+  coulomb:
+    enabled: false
+    screening: none
+
+fields:
+  optical:
+    - id: opt_1
+      pulse_type: gaussian
+      amplitude: 0.001
+      frequency: 2.298
+      duration_fs: 20
+      t0_fs: 0
+
+  dc:
+    - id: dc_1
+      pulse_type: box
+      amplitude: 0.0
+      t_on_fs: -100
+      t_off_fs: 100
+
+sweep:
+  strategy: cartesian
+  nest_by: optical
+
+output:
+  root_dir: smoke_out
+  format: tsv
+  save_k_resolved: true
+  save_macroscopic: true
+  observables:
+    - polarization
+    - number_density
+    - current_density

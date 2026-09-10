@@ -11,8 +11,8 @@ simulation:
     coulomb_constant: 201116300000000 # coulomb constant
 
   order_expansion:
-    enabled: true
-    max_order: 3
+    enabled: false
+    max_order: 0
 
 discretization:
   k_points: 1001
@@ -47,7 +47,7 @@ sweep:
 
 output:
   root_dir: output
-  format: binary
+  format: tsv
   save_k_resolved: true
   save_macroscopic: true
   observables:
