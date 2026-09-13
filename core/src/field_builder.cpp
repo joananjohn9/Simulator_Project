@@ -31,7 +31,7 @@ namespace
         if(!std::isfinite(dt_s)|| dt_s <=0){
             
             throw std::invalid_argument(
-                "buld_field_samples : dt_s must be finite and positive"
+                "build_field_samples : dt_s must be finite and positive"
             );
 
         }//end if

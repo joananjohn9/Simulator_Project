@@ -73,7 +73,7 @@ void Engine::write_meta()
     json meta;
 
     meta["schema_version"] = config_.schema_version;
-    meta["status"] = "grid_field_and_result_debug";
+    meta["status"] = "rk4_simple_rhs";
 
     meta["model"] = {
         {"type", config_.simulation_config.model_config.type},
@@ -182,8 +182,8 @@ void Engine::write_results(const SimulationResult& result)
     write_table_tsv(
         {
             {"k_1_per_m", result.k_grid},
-            {"E_v", result.valence_band},
-            {"E_c", result.conduction_band}
+            {"E_v_J", result.valence_band},
+            {"E_c_J", result.conduction_band}
         },
         sim_output_dir_ / "bands.dat"
     ); 
