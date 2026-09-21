@@ -103,3 +103,48 @@ void rk4_step_simple(
             (k1.n_k[k] + 2.0 * k2.n_k[k] + 2.0 * k3.n_k[k] + k4.n_k[k]);
     }
 }
+
+void rk4_step_non_interacting(SBEState& state,
+    const std::vector<double>& omega_k,
+    double E_t,
+    double E_half,
+    double E_next,
+    double dt_s,
+    const ModelConfig& model
+)
+{
+    validate_state_sizes(state, omega_k);
+
+    if (dt_s <= 0.0) {
+        throw std::invalid_argument("rk4_step_non_interacting: dt_s must be positive");
+    }
+
+    const std::size_t nk = state.p_k.size();
+
+    SBEState k1 = make_zero_state(nk);
+    SBEState k2 = make_zero_state(nk);
+    SBEState k3 = make_zero_state(nk);
+    SBEState k4 = make_zero_state(nk);
+
+    compute_rhs_non_interacting(state, k1, omega_k, E_t, model);
+
+    SBEState temp = add_scaled_state(state, k1, 0.5 * dt_s);
+    compute_rhs_non_interacting(temp, k2, omega_k, E_half, model);
+
+    temp = add_scaled_state(state, k2, 0.5 * dt_s);
+    compute_rhs_non_interacting(temp, k3, omega_k, E_half, model);
+
+    temp = add_scaled_state(state, k3, dt_s);
+    compute_rhs_non_interacting(temp, k4, omega_k, E_next, model);
+
+    for (std::size_t k = 0; k < nk; ++k) {
+        state.p_k[k] +=
+            (dt_s / 6.0) *
+            (k1.p_k[k] + 2.0 * k2.p_k[k] + 2.0 * k3.p_k[k] + k4.p_k[k]);
+
+        state.n_k[k] +=
+            (dt_s / 6.0) *
+            (k1.n_k[k] + 2.0 * k2.n_k[k] + 2.0 * k3.n_k[k] + k4.n_k[k]);
+    }
+
+}

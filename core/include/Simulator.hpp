@@ -46,5 +46,7 @@ class Simulator{
         SimulationResult initialize_result();      
         SBEState make_initial_state(std::size_t k_points) const; 
         Macroscopic_observables compute_macroscopic_observables(const SBEState& state) const;
+        
            
 };
+

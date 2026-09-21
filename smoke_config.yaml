@@ -29,7 +29,7 @@ fields:
   optical:
     - id: opt_1
       pulse_type: gaussian
-      amplitude: 0.001
+      amplitude: 0.000
       frequency: 2.298
       duration_fs: 20
       t0_fs: 0

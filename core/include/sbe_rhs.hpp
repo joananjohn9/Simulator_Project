@@ -17,3 +17,11 @@ void compute_rhs_simple(
     double E_t,
     const ModelConfig& model
 );
+
+void compute_rhs_non_interacting(
+    const SBEState& state,
+    SBEState& rhs,
+    const std::vector<double>& omega_k,
+    double E_t,
+    const ModelConfig& model
+);

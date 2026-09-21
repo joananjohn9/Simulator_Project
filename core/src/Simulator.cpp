@@ -29,7 +29,7 @@ SimulationResult Simulator::run()
     const double dt_s = config_.grid_config.dt_fs*1.0e-15;
 
     for (std::size_t ti = 0; ti < result.time_s.size(); ++ti) {
-        rk4_step_simple(
+        rk4_step_non_interacting(
         state,
         omega_k,
         result.fields.optical_t[ti],

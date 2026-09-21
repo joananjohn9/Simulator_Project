@@ -14,3 +14,12 @@ void rk4_step_simple(
     double dt_s,
     const ModelConfig& model
 );
+
+void rk4_step_non_interacting(SBEState& state,
+    const std::vector<double>& omega_k,
+    double E_t,
+    double E_half,
+    double E_next,
+    double dt_s,
+    const ModelConfig& model
+);
