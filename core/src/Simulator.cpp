@@ -29,6 +29,16 @@ SimulationResult Simulator::run()
     const double dt_s = config_.grid_config.dt_fs*1.0e-15;
 
     for (std::size_t ti = 0; ti < result.time_s.size(); ++ti) {
+
+        const Macroscopic_observables obs = compute_macroscopic_observables(state);
+
+        append_observables(result,obs);
+
+        if (ti + 1 >= result.time_s.size())
+        {
+            break;
+        }
+        
         rk4_step_non_interacting(
         state,
         omega_k,
@@ -39,9 +49,7 @@ SimulationResult Simulator::run()
         config_.simulation_config.model_config
     );
         
-        const Macroscopic_observables obs = compute_macroscopic_observables(state);
-
-        append_observables(result,obs);
+        
     }
 
     return result;

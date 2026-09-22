@@ -16,7 +16,7 @@ simulation:
 
 discretization:
   k_points: 101
-  dt_fs: 0.05
+  dt_fs: 0.025
   t_start_fs: -100
   t_end_fs: 100
 
@@ -27,9 +27,9 @@ interactions:
 
 fields:
   optical:
-    - id: opt_1
+    - id: opt_2
       pulse_type: gaussian
-      amplitude: 0.000
+      amplitude: 0.001
       frequency: 2.298
       duration_fs: 20
       t0_fs: 0
